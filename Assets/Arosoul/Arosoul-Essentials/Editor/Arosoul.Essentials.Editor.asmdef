@@ -1,0 +1,18 @@
+{
+    "name": "Arosoul.Essentials.Editor",
+    "rootNamespace": "",
+    "references": [
+        "GUID:ddaac235cd59635bd8b2c23f3d5deb17"
+    ],
+    "includePlatforms": [
+        "Editor"
+    ],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}

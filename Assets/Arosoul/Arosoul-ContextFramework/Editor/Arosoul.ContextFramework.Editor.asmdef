@@ -1,0 +1,20 @@
+{
+    "name": "Arosoul.ContextFramework.Editor",
+    "rootNamespace": "",
+    "references": [
+        "Arosoul.ContextFramework",
+        "Arosoul.Essentials",
+        "Arosoul.Essentials.Editor"
+    ],
+    "includePlatforms": [
+        "Editor"
+    ],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}

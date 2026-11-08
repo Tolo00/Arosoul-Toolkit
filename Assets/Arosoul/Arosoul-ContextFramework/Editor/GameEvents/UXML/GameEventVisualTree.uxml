@@ -1,0 +1,20 @@
+<ui:UXML xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:ui="UnityEngine.UIElements" xmlns:uie="UnityEditor.UIElements" noNamespaceSchemaLocation="../../../../../../UIElementsSchema/UIElements.xsd" editor-extension-mode="True">
+    <ui:VisualElement name="title" style="flex-grow: 1; border-bottom-color: rgb(92, 92, 92); border-bottom-width: 1.5px; margin-top: 10px; flex-direction: row; border-left-color: rgb(92, 92, 92); border-right-color: rgb(92, 92, 92); border-top-color: rgb(92, 92, 92); padding-bottom: 10px;">
+        <ui:Label text="(EventName)" name="event-name-label" style="flex-wrap: nowrap; width: 50%; margin-top: 0; font-size: 20px; -unity-font-style: normal; -unity-text-outline-width: 0; border-bottom-width: 0; border-bottom-color: rgb(0, 0, 0); padding-bottom: 0; flex-direction: column; align-self: flex-start;" />
+        <ui:Button text="Raise Event" name="raise-button" style="width: 49%; align-self: flex-start; height: 24px; font-size: 14px; flex-direction: column; white-space: pre; flex-wrap: nowrap; -unity-font-style: normal;" />
+    </ui:VisualElement>
+    <ui:VisualElement name="debug-mode" style="flex-grow: 1; border-bottom-color: rgb(92, 92, 92); border-bottom-width: 0; margin-top: 10px; flex-direction: row; border-left-color: rgb(92, 92, 92); border-right-color: rgb(92, 92, 92); border-top-color: rgb(92, 92, 92); padding-bottom: 10px;">
+        <ui:Label text="Debug Mode" style="flex-wrap: nowrap; width: 70%; margin-top: 0; font-size: 15px; -unity-font-style: normal; -unity-text-outline-width: 0; border-bottom-width: 0; border-bottom-color: rgb(0, 0, 0); padding-bottom: 0; flex-direction: column; align-self: flex-start;" />
+        <ui:Button text="Enable" name="debug-mode-enabler" style="width: 29%; align-self: flex-start; height: 20px; font-size: 13px; flex-direction: column; white-space: pre; flex-wrap: nowrap; -unity-font-style: normal;" />
+    </ui:VisualElement>
+    <ui:VisualElement name="debug-panel" style="flex-grow: 1; flex-direction: row; background-color: rgb(95, 95, 95); margin-bottom: 0; display: flex;">
+        <ui:VisualElement name="debug-listeners" style="flex-grow: 1; width: 50%; border-right-color: rgb(0, 0, 0); border-right-width: 1.5px; background-color: rgba(0, 0, 0, 0); padding-left: 10px; padding-top: 5px; padding-right: 10px; padding-bottom: 10px;">
+            <ui:Label text="Active Listeners" style="font-size: 13px; -unity-font-style: bold;" />
+            <ui:VisualElement name="listener-container" style="flex-grow: 1; margin-top: 10px; background-color: rgb(62, 62, 62); padding-left: 10px; padding-top: 10px; padding-right: 10px; padding-bottom: 10px;" />
+        </ui:VisualElement>
+        <ui:VisualElement name="debug-history" style="flex-grow: 1; width: 50%; padding-top: 5px; padding-left: 10px; padding-right: 10px; padding-bottom: 10px;">
+            <ui:Label text="Raise History" style="font-size: 13px; -unity-font-style: bold;" />
+            <ui:VisualElement name="history-container" style="flex-grow: 1; margin-top: 10px; background-color: rgb(62, 62, 62); padding-left: 10px; padding-top: 10px; padding-right: 10px; padding-bottom: 10px;" />
+        </ui:VisualElement>
+    </ui:VisualElement>
+</ui:UXML>
