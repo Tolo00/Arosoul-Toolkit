@@ -15,4 +15,6 @@ MonoBehaviour:
   _coreSceneName: Core
   _loadCoreSceneOnStartup: 0
   _initialSceneSlot: Main
-  _registeredTransitions: []
+  _registeredTransitions:
+  - _transitionKey: 
+    _transitionPrefab: {fileID: 0}
