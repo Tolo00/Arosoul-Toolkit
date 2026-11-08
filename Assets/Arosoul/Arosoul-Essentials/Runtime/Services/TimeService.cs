@@ -1,26 +1,28 @@
 using System;
 using Arosoul.Essentials;
+using Unity.Scripting.LifecycleManagement;
 using UnityEngine;
 
 /// <summary>
 /// Static wrapper around the Time class.
 /// Prefered over interacting with Time directly as it can keep track of whether the game is paused or not.
 /// </summary>
-public static class TimeService {
-    private static float currentTimeScale = 1;
-    private static bool isPaused = false;
+public static partial class TimeService {
+
+    [AutoStaticsCleanup] static float currentTimeScale = 1;
+    [AutoStaticsCleanup] static bool isPaused = false;
+
+    // Callbacks
+    [AutoStaticsCleanup] public static event Action OnTimePaused;
+    [AutoStaticsCleanup] public static event Action OnTimeResumed;
+
+    [AutoStaticsCleanup] public static event Action<DataChange<float>> OnSetTimeScale;
 
     public static float DeltaTime => Time.deltaTime;
     public static float UnscaledDeltaTime => Time.unscaledDeltaTime;
     public static float TimeScale => Time.timeScale;
 
     public static bool IsPaused => isPaused;
-
-
-    public static event Action OnTimePaused;
-    public static event Action OnTimeResumed;
-
-    public static event Action<DataChange<float>> OnSetTimeScale;
 
 
     public static void Pause() {
