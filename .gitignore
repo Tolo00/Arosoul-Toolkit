@@ -2,7 +2,7 @@
 #
 # Get latest from https://github.com/github/gitignore/blob/main/Unity.gitignore
 #
-# Recommended: add any editor/OS/tool-specific ignore rules from the Global/ templates as needed.
+# Includes Unity, macOS, Windows, IDE, and FMOD temporary-file rules.
 # See: https://github.com/github/gitignore/tree/main/Global
 #
 .utmp/
@@ -107,3 +107,36 @@ InitTestScene*.unity*
 
 # Auto-generated cache in Assets folder
 /[Aa]ssets/[Ss]ceneDependencyCache*
+
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+._*
+.Spotlight-V100
+.Trashes
+.fseventsd
+.TemporaryItems
+.VolumeIcon.icns
+.com.apple.timemachine.donotpresent
+
+# Windows
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+$RECYCLE.BIN/
+
+# FMOD Studio local/cache files
+# Keep .fspro projects, Metadata, and built banks under version control when needed.
+**/.cache/
+*.fspro.user
+*.fspro.userprefs
+
+# Local developer workspace inside Assets.
+# Keep the folder's .gitignore tracked, but ignore everything else in Assets/User.
+/[Aa]ssets/[Uu]ser/**
+!/[Aa]ssets/[Uu]ser/.gitignore
+
+# Unity user-specific settings
+/[Uu]ser[Ss]ettings/
+/[Aa]ssets/[Uu]ser.meta
