@@ -1,0 +1,21 @@
+{
+    "name": "Arosoul.Tools",
+    "rootNamespace": "",
+    "references": [
+        "GUID:6055be8ebefd69e48b49212b09b47b2f",
+        "GUID:ddaac235cd59635bd8b2c23f3d5deb17",
+        "GUID:6d54b2b0ef687ffcc817c71d1db017b4",
+        "GUID:9e05a35448a28804e95926ad9b2eb2f6",
+        "GUID:4307f53044263cf4b835bd812fc161a4",
+        "GUID:776d03a35f1b52c4a9aed9f56d7b4229"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}

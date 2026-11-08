@@ -1,0 +1,32 @@
+Arosoul Toolkit License Agreement
+
+Copyright © Tobias Löwdin
+All Rights Reserved
+
+This software package (the "Package") is the property of Tobias Löwdin and is licensed, not sold.
+By accessing or using the Package, you agree to the following terms:
+
+1. Authorized Use
+- The Package may only be used by Tobias Löwdin and individuals or teams explicitly authorized by Tobias Löwdin ("Authorized Users").
+- Authorized Users may use the Package solely within the scope of the internal development projects for which it was provided (the "Project").
+
+2. Restrictions
+- The Package, including its tools, code, assets, and any derivative works, may not be copied, distributed, sublicensed, sold, or used in any project other than the Project without prior permission from Tobias Löwdin.
+- Modification of the Package is permitted only for purposes directly related to the Project.
+- Redistribution of the Package or any of its components outside authorized internal use is prohibited.
+
+3. Ownership
+- All intellectual property rights in and to the Package (excluding assets located in the "ThirdParty" folder) remain the exclusive property of Tobias Löwdin.
+- The "ThirdParty" folder may contain open-source or external tools, libraries, or assets that are not owned by Tobias Löwdin.
+- These components are subject to their respective third-party licenses, which are included within their individual subdirectories or documentation.
+- Tobias Löwdin makes no claim of ownership or authorship over these third-party assets.
+- No rights are granted other than those expressly stated in this License.
+
+4. Termination
+- Any unauthorized use of the Package outside the Project or by unauthorized individuals will result in immediate termination of this License.
+- Upon termination, all copies of the Package must be destroyed.
+
+5. Disclaimer
+- The Package is provided "as is," without warranty of any kind.
+- Tobias Löwdin shall not be liable for any damages, losses, or claims arising from the use or inability to use the Package or any third-party components included within it.
+- The inclusion of third-party assets does not imply endorsement or responsibility for their performance, licensing, or support.

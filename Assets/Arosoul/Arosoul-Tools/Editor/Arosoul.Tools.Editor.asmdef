@@ -1,0 +1,21 @@
+{
+    "name": "Arosoul.Tools.Editor",
+    "rootNamespace": "",
+    "references": [
+        "Arosoul.Tools",
+        "Arosoul.Essentials",
+        "Arosoul.Essentials.Editor",
+        "NaughtyAttributes.Core"
+    ],
+    "includePlatforms": [
+        "Editor"
+    ],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}

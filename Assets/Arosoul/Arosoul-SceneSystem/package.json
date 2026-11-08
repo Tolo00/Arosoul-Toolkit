@@ -1,0 +1,25 @@
+{
+  "name": "com.arosoul.scenesystem",
+  "version": "1.0.0",
+  "displayName": "Arosoul Scene System",
+  "description": "Perform scene operations with ease. Load, unload, and keep track of addative scenes using scene slots.",
+  "unity": "6000.0",
+  "author": {
+    "name": "Tobias Löwdin",
+    "url": "https://tolo00.github.io/"
+  },
+  "license": "SEE LICENSE IN LICENSE.txt",
+  "keywords": [
+    "arosoul",
+    "unity",
+    "context",
+    "events",
+    "scriptable objects",
+    "shared variables",
+    "event bus",
+    "debugging"
+  ],
+  "dependencies": {
+    "com.arosoul.essentials": "1.0.0"
+  }
+}
