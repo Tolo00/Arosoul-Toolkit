@@ -199,6 +199,13 @@
         "com.unity.modules.physics": "1.0.0"
       }
     },
+    "today.comes.saintsfield": {
+      "version": "https://github.com/TylerTemp/SaintsField.git",
+      "depth": 0,
+      "source": "git",
+      "dependencies": {},
+      "hash": "839ee86472e71db6a53e00d0d42a1e049d231908"
+    },
     "com.unity.modules.accessibility": {
       "version": "1.0.0",
       "depth": 0,
