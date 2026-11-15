@@ -1,0 +1,18 @@
+{
+    "name": "Arosoul.PlayerSettings.Editor",
+    "rootNamespace": "Arosoul.PlayerSettings.EditorTools",
+    "references": [
+        "Arosoul.PlayerSettings"
+    ],
+    "includePlatforms": [
+        "Editor"
+    ],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}

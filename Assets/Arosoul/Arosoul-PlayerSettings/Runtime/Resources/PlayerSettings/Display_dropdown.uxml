@@ -1,0 +1,9 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements">
+    <!-- Enum dropdown. Required: DropdownField "dropdown".  Optional: Label "label". -->
+    <ui:VisualElement class="setting-row setting-row--dropdown">
+        <ui:Label name="label" class="setting-label" />
+        <ui:VisualElement class="setting-control">
+            <ui:DropdownField name="dropdown" class="setting-dropdown" />
+        </ui:VisualElement>
+    </ui:VisualElement>
+</ui:UXML>

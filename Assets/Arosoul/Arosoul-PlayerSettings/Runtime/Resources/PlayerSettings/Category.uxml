@@ -1,0 +1,6 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements">
+    <!-- One page per category. Required: an element named "entries" that the setting rows are added to. -->
+    <ui:ScrollView name="page" class="settings-page">
+        <ui:VisualElement name="entries" class="settings-entries" />
+    </ui:ScrollView>
+</ui:UXML>

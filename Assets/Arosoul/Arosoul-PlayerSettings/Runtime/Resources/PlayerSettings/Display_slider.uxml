@@ -1,0 +1,10 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements">
+    <!-- Int / Float slider. Required: Slider "slider".  Optional: Label "label", Label "value". -->
+    <ui:VisualElement class="setting-row setting-row--slider">
+        <ui:Label name="label" class="setting-label" />
+        <ui:VisualElement class="setting-control">
+            <ui:Slider name="slider" class="setting-slider" />
+            <ui:Label name="value" class="setting-value" />
+        </ui:VisualElement>
+    </ui:VisualElement>
+</ui:UXML>

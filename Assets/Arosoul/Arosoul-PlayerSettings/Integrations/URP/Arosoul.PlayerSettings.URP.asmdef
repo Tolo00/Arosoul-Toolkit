@@ -1,0 +1,26 @@
+{
+    "name": "Arosoul.PlayerSettings.URP",
+    "rootNamespace": "Arosoul.PlayerSettings",
+    "references": [
+        "Arosoul.PlayerSettings",
+        "Unity.RenderPipelines.Core.Runtime",
+        "Unity.RenderPipelines.Universal.Runtime"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [
+        "PLAYERSETTINGS_URP"
+    ],
+    "versionDefines": [
+        {
+            "name": "com.unity.render-pipelines.universal",
+            "expression": "",
+            "define": "PLAYERSETTINGS_URP"
+        }
+    ],
+    "noEngineReferences": false
+}

@@ -1,0 +1,4 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements">
+    <!-- One tab button per category. Required: Button named "tab". -->
+    <ui:Button name="tab" class="settings-tab" />
+</ui:UXML>

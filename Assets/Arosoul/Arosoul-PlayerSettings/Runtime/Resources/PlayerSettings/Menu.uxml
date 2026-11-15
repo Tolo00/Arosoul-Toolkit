@@ -1,0 +1,14 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements">
+    <!--
+        Main container. Required element names:  tabs, pages, footer
+        Optional:                                title
+    -->
+    <ui:VisualElement name="window" class="settings-window">
+        <ui:Label name="title" text="Settings" class="settings-title" />
+        <ui:VisualElement name="body" class="settings-body">
+            <ui:VisualElement name="tabs" class="settings-tabs" />
+            <ui:VisualElement name="pages" class="settings-pages" />
+        </ui:VisualElement>
+        <ui:VisualElement name="footer" class="settings-footer" />
+    </ui:VisualElement>
+</ui:UXML>

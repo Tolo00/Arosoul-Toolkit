@@ -1,0 +1,9 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements">
+    <!-- String field. Required: TextField "field".  Optional: Label "label". -->
+    <ui:VisualElement class="setting-row setting-row--text">
+        <ui:Label name="label" class="setting-label" />
+        <ui:VisualElement class="setting-control">
+            <ui:TextField name="field" class="setting-text-field" />
+        </ui:VisualElement>
+    </ui:VisualElement>
+</ui:UXML>

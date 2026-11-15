@@ -1,0 +1,4 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements">
+    <!-- Footer button (Apply, Undo, Reset, Close). Required: Button named "button". A modifier class (apply, undo, reset, close) is added in code. -->
+    <ui:Button name="button" class="settings-button" />
+</ui:UXML>

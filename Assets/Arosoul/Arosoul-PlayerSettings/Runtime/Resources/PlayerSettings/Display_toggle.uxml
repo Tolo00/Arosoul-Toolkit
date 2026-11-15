@@ -1,0 +1,10 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements">
+    <!-- Bool toggle. Required: Toggle "toggle".  Optional: Label "label", Label "value" (shows On / Off). -->
+    <ui:VisualElement class="setting-row setting-row--toggle">
+        <ui:Label name="label" class="setting-label" />
+        <ui:VisualElement class="setting-control">
+            <ui:Toggle name="toggle" class="setting-toggle" />
+            <ui:Label name="value" class="setting-value" />
+        </ui:VisualElement>
+    </ui:VisualElement>
+</ui:UXML>

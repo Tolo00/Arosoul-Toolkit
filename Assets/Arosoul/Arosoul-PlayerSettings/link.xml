@@ -1,0 +1,6 @@
+<linker>
+    <!-- Built-in settings and display types are found by reflection, keep them from being stripped (IL2CPP).
+         If you add your own SettingDefinition / SettingDisplay subclasses in another assembly, preserve it here too. -->
+    <assembly fullname="Arosoul.PlayerSettings" preserve="all"/>
+    <assembly fullname="Arosoul.PlayerSettings.URP" preserve="all"/>
+</linker>

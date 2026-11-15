@@ -1,0 +1,11 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements">
+    <!-- Int / Float with buttons. Required: Buttons "decrease" and "increase".  Optional: Label "label", Label "value". -->
+    <ui:VisualElement class="setting-row setting-row--stepper">
+        <ui:Label name="label" class="setting-label" />
+        <ui:VisualElement class="setting-control">
+            <ui:Button name="decrease" text="&lt;" class="setting-step-button" />
+            <ui:Label name="value" class="setting-value setting-value--centered" />
+            <ui:Button name="increase" text="&gt;" class="setting-step-button" />
+        </ui:VisualElement>
+    </ui:VisualElement>
+</ui:UXML>
