@@ -22,6 +22,8 @@ namespace Arosoul.PlayerSettings {
     [Serializable]
     public sealed class CategoryLayout {
         public string name = "New Category";
+        public ApplyMode applyMode = ApplyMode.Manual;
+        public bool showResetButton = true;
         public List<EntryLayout> entries = new List<EntryLayout>();
     }
 
@@ -29,12 +31,10 @@ namespace Arosoul.PlayerSettings {
     /// Describes how the settings menu is generated: which tabs exist, which settings each tab contains
     /// and how each setting is displayed. Edit the categories with the "Edit Categories" button in the inspector.
     /// </summary>
-    [CreateAssetMenu(fileName = "SettingsLayout", menuName = "Arosoul/Player Settings/Settings Layout")]
+    [CreateAssetMenu(fileName = "SettingsLayout", menuName = "Player Settings/Settings Layout")]
     public sealed class SettingsLayout : ScriptableObject {
         [SerializeField] string title = "Settings";
         [SerializeField] TabOrientation tabOrientation = TabOrientation.Horizontal;
-        [SerializeField] ApplyMode applyMode = ApplyMode.Manual;
-        [SerializeField] bool showResetButton = true;
         [SerializeField] bool showCloseButton = true;
         [Tooltip("Optional. Overrides the default UXML templates and styling.")]
         [SerializeField] SettingsTheme theme;
@@ -42,8 +42,6 @@ namespace Arosoul.PlayerSettings {
 
         public string Title => title;
         public TabOrientation TabOrientation => tabOrientation;
-        public ApplyMode ApplyMode => applyMode;
-        public bool ShowResetButton => showResetButton;
         public bool ShowCloseButton => showCloseButton;
         public SettingsTheme Theme => theme;
         public List<CategoryLayout> Categories => categories;

@@ -28,7 +28,7 @@ Drop the folder into `Assets/` (or a package). Needs the UI Toolkit runtime (bui
 * If your subclasses live in another assembly, add it to `link.xml` (IL2CPP stripping) and make it reference `Arosoul.PlayerSettings`.
 
 ## Behaviour notes
-* Manual apply mode stages edits; Reset stages the defaults (press Apply). Instant mode applies every change and Reset applies immediately.
+* Apply mode and the Reset button are set per category. In a manual category, edits are staged and Apply / Undo / Reset only touch that category's settings (Reset stages the defaults, press Apply). In an instant category every change applies immediately and Reset applies immediately.
 * Custom setting ids are the API names, so renaming one resets its saved value. Min/Max always clamp int and float settings.
 * Layout entries render in the order they were toggled on. Untick and re-tick to move one to the end.
 * Brightness needs `com.unity.render-pipelines.universal` (version define in the URP asmdef). Verify the asmdef assembly names if your 6.6 URP differs.

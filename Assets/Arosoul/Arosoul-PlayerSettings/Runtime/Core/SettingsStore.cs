@@ -121,13 +121,20 @@ namespace Arosoul.PlayerSettings {
             return true;
         }
 
-        public void ApplyPending() {
-            if (pending.Count == 0) return;
+        public bool HasPendingIn(IEnumerable<string> ids) {
+            foreach (var id in ids) if (pending.ContainsKey(id)) return true;
+            return false;
+        }
 
-            var toApply = definitions.Where(d => pending.ContainsKey(d.Id)).ToList();
-            foreach (var def in toApply) applied[def.Id] = pending[def.Id];
-            pending.Clear();
+        public void ApplyPending() => ApplyPending(null);
 
+        /// <param name="ids">Only these settings are applied. Null means all.</param>
+        public void ApplyPending(IEnumerable<string> ids) {
+            var scope = ids != null ? new HashSet<string>(ids) : null;
+            var toApply = definitions.Where(d => pending.ContainsKey(d.Id) && (scope == null || scope.Contains(d.Id))).ToList();
+            if (toApply.Count == 0) return;
+
+            foreach (var def in toApply) { applied[def.Id] = pending[def.Id]; pending.Remove(def.Id); }
             foreach (var def in toApply) SafeApply(def, applied[def.Id]);
             saveRequested = true;
 
@@ -136,18 +143,26 @@ namespace Arosoul.PlayerSettings {
             StateChanged?.Invoke();
         }
 
-        public void RevertPending() {
-            if (pending.Count == 0) return;
-            pending.Clear();
+        public void RevertPending() => RevertPending(null);
+
+        public void RevertPending(IEnumerable<string> ids) {
+            if (ids == null) pending.Clear();
+            else foreach (var id in ids) pending.Remove(id);
             StateChanged?.Invoke();
         }
 
+        public void ResetToDefaults(bool applyImmediately) => ResetToDefaults(null, applyImmediately);
+
+        /// <param name="ids">Only these settings are reset. Null means all.</param>
         /// <param name="applyImmediately">False stages the defaults so the player can review them and press Apply.</param>
-        public void ResetToDefaults(bool applyImmediately) {
-            pending.Clear();
+        public void ResetToDefaults(IEnumerable<string> ids, bool applyImmediately) {
+            var scope = ids != null ? new HashSet<string>(ids) : null;
             var changed = new List<SettingDefinition>();
 
             foreach (var def in definitions) {
+                if (scope != null && !scope.Contains(def.Id)) continue;
+
+                pending.Remove(def.Id);
                 object d = GetDefault(def);
                 if (SettingValues.AreEqual(def.Type, d, applied[def.Id])) continue;
 

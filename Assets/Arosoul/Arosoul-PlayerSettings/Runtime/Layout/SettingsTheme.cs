@@ -10,7 +10,7 @@ namespace Arosoul.PlayerSettings {
     /// Any template left empty falls back to the default one in Resources/PlayerSettings.
     /// Required element names for each template are documented in the default UXML files.
     /// </summary>
-    [CreateAssetMenu(fileName = "SettingsTheme", menuName = "Arosoul/Player Settings/Settings Theme")]
+    [CreateAssetMenu(fileName = "SettingsTheme", menuName = "Player Settings/Settings Theme")]
     public sealed class SettingsTheme : ScriptableObject {
 
         [Serializable]

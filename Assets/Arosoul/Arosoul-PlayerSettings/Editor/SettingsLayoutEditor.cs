@@ -6,7 +6,7 @@ namespace Arosoul.PlayerSettings.EditorTools {
 
     [CustomEditor(typeof(SettingsLayout))]
     public sealed class SettingsLayoutEditor : Editor {
-        static readonly string[] Properties = { "title", "tabOrientation", "applyMode", "showResetButton", "showCloseButton", "theme" };
+        static readonly string[] Properties = { "title", "tabOrientation", "showCloseButton", "theme" };
 
         public override VisualElement CreateInspectorGUI() {
             var root = new VisualElement();

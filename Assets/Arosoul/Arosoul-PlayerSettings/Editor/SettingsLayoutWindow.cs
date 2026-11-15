@@ -151,6 +151,22 @@ namespace Arosoul.PlayerSettings.EditorTools {
             });
             rightPane.Add(nameField);
 
+            var modeField = new EnumField("Apply Mode", category.applyMode);
+            modeField.RegisterValueChangedCallback(e => {
+                Undo.RecordObject(layout, "Change Apply Mode");
+                category.applyMode = (ApplyMode)e.newValue;
+                EditorUtility.SetDirty(layout);
+            });
+            rightPane.Add(modeField);
+
+            var resetToggle = new Toggle("Show Reset Button") { value = category.showResetButton };
+            resetToggle.RegisterValueChangedCallback(e => {
+                Undo.RecordObject(layout, "Change Reset Button");
+                category.showResetButton = e.newValue;
+                EditorUtility.SetDirty(layout);
+            });
+            rightPane.Add(resetToggle);
+
             var list = new ScrollView();
             list.style.flexGrow = 1;
 
