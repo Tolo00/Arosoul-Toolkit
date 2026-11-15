@@ -30,7 +30,6 @@ namespace ProjectWizard
         private readonly List<CategoryGroup> _groups = new List<CategoryGroup>();
 
         private VisualElement _controls;
-        private Toggle _createFolders;
         private ToolbarSearchField _search;
         private Label _selectionCount;
         private Button _runButton;
@@ -108,9 +107,6 @@ namespace ProjectWizard
         {
             var section = WizardStyles.Section("Folders", out var body);
 
-            _createFolders = new Toggle { text = "Create folders and starter files", value = true };
-            body.Add(_createFolders);
-
             var preview = new Foldout { text = "Preview", value = false };
             foreach (var folder in WizardConfig.Folders)
                 preview.Add(MutedLabel(folder));
@@ -118,9 +114,9 @@ namespace ProjectWizard
                 preview.Add(MutedLabel(file.Path));
             body.Add(preview);
 
-            var now = new Button(FolderSetup.Run) { text = "Create folders now" };
-            now.style.marginTop = 4;
-            body.Add(now);
+            var create = new Button(FolderSetup.Run) { text = "Create folders" };
+            create.style.marginTop = 4;
+            body.Add(create);
 
             return section;
         }
@@ -312,17 +308,11 @@ namespace ProjectWizard
                 .Select(r => r.Def)
                 .ToList();
 
-            if (!_createFolders.value && selected.Count == 0)
+            if (selected.Count == 0)
             {
                 WizardLog.Warn("Nothing selected.");
                 return;
             }
-
-            if (_createFolders.value)
-                FolderSetup.Run();
-
-            if (selected.Count == 0)
-                return;
 
             var plan = InstallPlan.Build(selected);
             if (plan.stages.Count == 0)
