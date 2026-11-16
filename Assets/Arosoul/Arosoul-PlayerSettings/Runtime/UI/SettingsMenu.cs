@@ -37,10 +37,24 @@ namespace Arosoul.PlayerSettings {
             view?.Show();
         }
 
-        /// <summary>Hides the menu. Edits that were not applied are discarded.</summary>
+        /// <summary>
+        /// Closes the menu. With unapplied changes it asks to apply or discard them first.
+        /// Calling it again while that prompt is showing dismisses the prompt and keeps the menu open and the changes untouched.
+        /// </summary>
         public void Close() {
+            if (view != null) {
+                if (view.IsPromptOpen) { view.DismissPrompt(); return; }
+
+                if (GameSettings.Store.HasPending) {
+                    view.ShowPrompt(null, CloseNow);
+                    return;
+                }
+            }
+            CloseNow();
+        }
+
+        void CloseNow() {
             wantVisible = false;
-            GameSettings.Store.RevertPending();
             view?.Hide();
             Closed?.Invoke();
         }

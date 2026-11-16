@@ -14,8 +14,32 @@ MonoBehaviour:
   m_EditorClassIdentifier: Arosoul.PlayerSettings::Arosoul.PlayerSettings.SettingsLayout
   title: Settings
   tabOrientation: 0
-  applyMode: 0
-  showResetButton: 1
   showCloseButton: 1
   theme: {fileID: 0}
-  categories: []
+  categories:
+  - name: General
+    applyMode: 1
+    showResetButton: 0
+    entries:
+    - settingId: brightness
+      displayType: slider
+  - name: Video
+    applyMode: 0
+    showResetButton: 1
+    entries:
+    - settingId: quality_level
+      displayType: dropdown
+    - settingId: display_mode
+      displayType: dropdown
+    - settingId: frame_rate_limit
+      displayType: dropdown
+    - settingId: resolution
+      displayType: dropdown
+    - settingId: vsync
+      displayType: toggle
+  - name: Sound
+    applyMode: 1
+    showResetButton: 0
+    entries:
+    - settingId: master_volume
+      displayType: slider

@@ -14,7 +14,7 @@ Drop the folder into `Assets/` (or a package). Needs the UI Toolkit runtime (bui
 2. **Layout:** `Create > Arosoul > Player Settings > Settings Layout`. Pick tab orientation / apply mode in the inspector,
    press **Edit Categories**, add categories, toggle settings on and choose a display type for each.
 3. **Menu:** add a `Panel Renderer` (with a Panel Settings asset, Source Asset left empty) to a GameObject, add `SettingsMenu`, assign the layout.
-   `Open()`, `Close()`, `Toggle()` are public. Unapplied edits are discarded on close.
+   `Open()`, `Close()`, `Toggle()` are public. Switching tab or closing with unapplied edits asks whether to apply or discard them. Calling `Close()` again while the prompt is open dismisses it and keeps the menu open.
 4. **Styling (optional):** `Create > Arosoul > Player Settings > Settings Theme`, assign it on the layout.
    Any template or style sheet you leave empty falls back to `Runtime/Resources/PlayerSettings/*`.
    The comment at the top of each UXML lists the element names the code expects (`label`, `slider`, `decrease`, ...).

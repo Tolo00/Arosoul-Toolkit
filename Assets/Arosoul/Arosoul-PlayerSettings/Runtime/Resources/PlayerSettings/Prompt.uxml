@@ -1,0 +1,13 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements">
+    <!-- Unapplied changes prompt. Required: Buttons "save" and "discard".  Optional: Labels "prompt-title", "prompt-message". -->
+    <ui:VisualElement name="overlay" class="settings-prompt-overlay">
+        <ui:VisualElement class="settings-prompt">
+            <ui:Label name="prompt-title" text="Unsaved Changes" class="settings-prompt-title" />
+            <ui:Label name="prompt-message" text="You have changes that haven't been applied yet. Do you want to apply them before continuing?" class="settings-prompt-message" />
+            <ui:VisualElement class="settings-prompt-buttons">
+                <ui:Button name="discard" text="Discard" class="settings-button" />
+                <ui:Button name="save" text="Save" class="settings-button settings-button--apply" />
+            </ui:VisualElement>
+        </ui:VisualElement>
+    </ui:VisualElement>
+</ui:UXML>

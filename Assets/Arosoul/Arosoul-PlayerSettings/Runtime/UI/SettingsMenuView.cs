@@ -22,12 +22,24 @@ namespace Arosoul.PlayerSettings {
         readonly List<SettingBinding> bindings = new List<SettingBinding>();
         readonly List<Button> tabs = new List<Button>();
         readonly List<VisualElement> pages = new List<VisualElement>();
+        static readonly string[] NoIds = new string[0];
+
+        int selectedTab = -1;
 
         VisualElement root;
-        int selectedTab = -1;
+        Button applyButton, undoButton, resetButton;
+
+        VisualElement window, promptOverlay;
+        IEnumerable<string> promptIds;
+        Action promptResolved;
+
 
         public event Action CloseRequested;
         public bool IsVisible { get; private set; }
+        public bool IsPromptOpen { get; private set; }
+
+        CategoryState CurrentState => selectedTab >= 0 && selectedTab < states.Count ? states[selectedTab] : null;
+        IEnumerable<string> CurrentIds => CurrentState != null ? CurrentState.Ids : (IEnumerable<string>)NoIds; // null would mean "all"
 
 
         sealed class CategoryState {
@@ -35,14 +47,7 @@ namespace Arosoul.PlayerSettings {
             public bool Instant;
             public readonly List<string> Ids = new List<string>();
         }
-
-        static readonly string[] NoIds = new string[0];
         readonly List<CategoryState> states = new List<CategoryState>();
-        Button applyButton, undoButton, resetButton;
-
-        CategoryState CurrentState => selectedTab >= 0 && selectedTab < states.Count ? states[selectedTab] : null;
-        IEnumerable<string> CurrentIds => CurrentState != null ? CurrentState.Ids : (IEnumerable<string>)NoIds; // null would mean "all"
-
         
 
         public SettingsMenuView(VisualElement host, SettingsLayout layout, SettingsStore store) {
@@ -72,6 +77,9 @@ namespace Arosoul.PlayerSettings {
             BuildCategories();
             BuildFooter();
 
+            window = root.Q("window");
+            BuildPrompt();
+
             store.StateChanged += OnStateChanged;
             host.Add(root);
 
@@ -89,6 +97,7 @@ namespace Arosoul.PlayerSettings {
 
         public void Hide() {
             if (root == null) return;
+            ClosePrompt();
             root.style.display = DisplayStyle.None;
             IsVisible = false;
         }
@@ -131,7 +140,7 @@ namespace Arosoul.PlayerSettings {
                 var tabButton = tabElement.Q<Button>("tab");
                 if (tabButton != null) {
                     tabButton.text = category.name;
-                    tabButton.clicked += () => Select(index);
+                    tabButton.clicked += () => TrySelect(index);
                     tabs.Add(tabButton);
                 }
                 tabContainer.Add(tabElement);
@@ -257,8 +266,87 @@ namespace Arosoul.PlayerSettings {
         static void SetShown(Button button, bool shown) {
             if (button != null) button.style.display = shown ? DisplayStyle.Flex : DisplayStyle.None;
         }
-    }
 
 #endregion
 
+#region Unapplied changes prompt
+
+        void BuildPrompt() {
+            var asset = Template(theme.PromptTemplate, "Prompt");
+            if (asset == null) return;
+
+            var overlay = asset.Instantiate();
+            var save = overlay.Q<Button>("save");
+            var discard = overlay.Q<Button>("discard");
+            if (save == null || discard == null) {
+                Debug.LogError("[Settings] Template 'Prompt' needs Buttons named 'save' and 'discard'.");
+                return;
+            }
+
+            // The template container has no size of its own, make it cover the whole menu.
+            overlay.style.position = Position.Absolute;
+            overlay.style.left = 0;
+            overlay.style.right = 0;
+            overlay.style.top = 0;
+            overlay.style.bottom = 0;
+            overlay.style.display = DisplayStyle.None;
+
+            save.clicked += () => ResolvePrompt(true);
+            discard.clicked += () => ResolvePrompt(false);
+
+            promptOverlay = overlay;
+            root.Add(promptOverlay); // sibling of the window, so disabling the window doesn't disable the prompt
+        }
+
+        /// <summary>Asks whether to apply or discard pending changes, then calls onResolved.</summary>
+        /// <param name="ids">The settings the choice applies to. Null means all.</param>
+        public void ShowPrompt(IEnumerable<string> ids, Action onResolved) {
+            if (promptOverlay == null) {
+                store.RevertPending(ids);
+                onResolved?.Invoke();
+                return;
+            }
+
+            promptIds = ids;
+            promptResolved = onResolved;
+            IsPromptOpen = true;
+
+            promptOverlay.style.display = DisplayStyle.Flex;
+            window?.SetEnabled(false); // block keyboard / gamepad navigation into the menu
+            promptOverlay.Q<Button>("save").Focus();
+        }
+
+        /// <summary>Hides the prompt without applying or discarding anything.</summary>
+        public void DismissPrompt() => ClosePrompt();
+
+        void ResolvePrompt(bool apply) {
+            var ids = promptIds;
+            var next = promptResolved;
+            ClosePrompt();
+
+            if (apply) store.ApplyPending(ids);
+            else store.RevertPending(ids);
+            next?.Invoke();
+        }
+
+        void ClosePrompt() {
+            if (!IsPromptOpen) return;
+            IsPromptOpen = false;
+            promptIds = null;
+            promptResolved = null;
+            promptOverlay.style.display = DisplayStyle.None;
+            window?.SetEnabled(true);
+        }
+
+        void TrySelect(int index) {
+            if (index == selectedTab || IsPromptOpen) return;
+
+            var state = CurrentState;
+            if (state != null && store.HasPendingIn(state.Ids)) ShowPrompt(state.Ids, () => Select(index));
+            else Select(index);
+        }
+
+#endregion
+
+    }
 }

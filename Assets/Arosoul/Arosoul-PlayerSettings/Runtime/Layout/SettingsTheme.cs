@@ -25,6 +25,7 @@ namespace Arosoul.PlayerSettings {
         [SerializeField] VisualTreeAsset tabTemplate;
         [SerializeField] VisualTreeAsset categoryTemplate;
         [SerializeField] VisualTreeAsset buttonTemplate;
+        [SerializeField] VisualTreeAsset promptTemplate;
 
         [Header("Settings rows")]
         [SerializeField] List<DisplayTemplate> displayTemplates = new List<DisplayTemplate>();
@@ -37,6 +38,7 @@ namespace Arosoul.PlayerSettings {
         public VisualTreeAsset TabTemplate => tabTemplate;
         public VisualTreeAsset CategoryTemplate => categoryTemplate;
         public VisualTreeAsset ButtonTemplate => buttonTemplate;
+        public VisualTreeAsset PromptTemplate => promptTemplate;
         public bool IncludeDefaultStyle => includeDefaultStyle;
         public IReadOnlyList<StyleSheet> StyleSheets => styleSheets;
 
