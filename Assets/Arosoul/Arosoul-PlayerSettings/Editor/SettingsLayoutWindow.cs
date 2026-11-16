@@ -17,11 +17,18 @@ namespace Arosoul.PlayerSettings.EditorTools {
 
         [SerializeField] SettingsLayout layout;
 
+        sealed class CatalogItem {
+            public string Id, Name, Group, Tooltip;
+            public List<KeyValuePair<string, string>> Displays = new List<KeyValuePair<string, string>>(); // id, name
+        }
+
+        List<CatalogItem> catalog = new List<CatalogItem>();
+
         int selected = -1;
         string search = string.Empty;
-        IReadOnlyList<SettingDefinition> catalog = new List<SettingDefinition>();
         ListView categoryList;
         VisualElement rightPane;
+        
 
         public static void Open(SettingsLayout layout) {
             var window = GetWindow<SettingsLayoutWindow>();
@@ -51,8 +58,7 @@ namespace Arosoul.PlayerSettings.EditorTools {
                 return;
             }
 
-            SettingsRegistry.Rebuild();
-            catalog = SettingsRegistry.All;
+            catalog = BuildCatalog();
 
             var split = new TwoPaneSplitView(0, 220, TwoPaneSplitViewOrientation.Horizontal);
             split.Add(BuildLeftPane());
@@ -65,6 +71,30 @@ namespace Arosoul.PlayerSettings.EditorTools {
 
             if (selected >= layout.Categories.Count) selected = layout.Categories.Count - 1;
             if (selected >= 0) categoryList.SetSelectionWithoutNotify(new[] { selected });
+            BuildRightPane();
+        }
+
+        static List<CatalogItem> BuildCatalog() {
+            SettingsRegistry.Rebuild();
+            var items = new List<CatalogItem>();
+
+            foreach (var def in SettingsRegistry.All) {
+                var item = new CatalogItem { Id = def.Id, Name = def.DisplayName, Group = def.Group, Tooltip = $"{def.Id} ({def.Type})" };
+                foreach (var display in SettingDisplays.For(def.Type)) item.Displays.Add(new KeyValuePair<string, string>(display.Id, display.DisplayName));
+                items.Add(item);
+            }
+
+            foreach (var section in SettingsRegistry.Sections) {
+                var item = new CatalogItem { Id = section.Id, Name = section.DisplayName, Group = section.Group, Tooltip = section.Id };
+                foreach (var display in section.Displays) item.Displays.Add(new KeyValuePair<string, string>(display.Id, display.Name));
+                items.Add(item);
+            }
+            return items;
+        }
+
+        void OnFocus() {
+            if (layout == null || rightPane == null) return;
+            catalog = BuildCatalog();
             BuildRightPane();
         }
 
@@ -184,24 +214,22 @@ namespace Arosoul.PlayerSettings.EditorTools {
         void FillList(ScrollView list, CategoryLayout category) {
             list.Clear();
 
-            bool Matches(SettingDefinition d) =>
-                search.Length == 0
-                || d.DisplayName.IndexOf(search, StringComparison.OrdinalIgnoreCase) >= 0
-                || d.Id.IndexOf(search, StringComparison.OrdinalIgnoreCase) >= 0
-                || d.Group.IndexOf(search, StringComparison.OrdinalIgnoreCase) >= 0;
+            bool Matches(string text) => text != null && text.IndexOf(search, StringComparison.OrdinalIgnoreCase) >= 0;
 
-            var groups = catalog.Where(Matches)
-                .GroupBy(d => d.Group)
+            var groups = catalog
+                .Where(i => search.Length == 0 || Matches(i.Name) || Matches(i.Id) || Matches(i.Group))
+                .GroupBy(i => i.Group)
                 .OrderBy(g => g.Key == "Custom" ? 1 : 0).ThenBy(g => g.Key, StringComparer.Ordinal);
 
             foreach (var group in groups) {
                 var foldout = new Foldout { text = group.Key, value = true };
-                foreach (var def in group.OrderBy(d => d.DisplayName, StringComparer.Ordinal)) foldout.Add(MakeRow(category, def));
+                foreach (var item in group.OrderBy(i => i.Name, StringComparer.Ordinal)) foldout.Add(MakeRow(category, item));
                 list.Add(foldout);
             }
 
-            // Entries pointing at settings that were deleted: let the user clean them up.
-            var missing = category.entries.Where(e => !catalog.Any(d => d.Id == e.settingId) && (search.Length == 0 || (e.settingId ?? string.Empty).IndexOf(search, StringComparison.OrdinalIgnoreCase) >= 0)).ToList();
+            var missing = category.entries
+                .Where(e => !catalog.Any(i => i.Id == e.settingId) && (search.Length == 0 || Matches(e.settingId)))
+                .ToList();
             if (missing.Count > 0) {
                 var foldout = new Foldout { text = MissingGroup, value = true };
                 foreach (var entry in missing) foldout.Add(MakeMissingRow(category, entry));
@@ -209,25 +237,25 @@ namespace Arosoul.PlayerSettings.EditorTools {
             }
         }
 
-        VisualElement MakeRow(CategoryLayout category, SettingDefinition def) {
-            var entry = category.entries.Find(e => e.settingId == def.Id);
-            var displays = SettingDisplays.For(def.Type).ToList();
+        VisualElement MakeRow(CategoryLayout category, CatalogItem item) {
+            var entry = category.entries.Find(e => e.settingId == item.Id);
+            var displays = item.Displays;
 
             var row = NewRow();
             var toggle = new Toggle { value = entry != null };
-            var label = new Label(def.DisplayName) { tooltip = $"{def.Id} ({def.Type})" };
+            var label = new Label(item.Name) { tooltip = item.Tooltip };
             label.style.flexGrow = 1;
 
-            int index = entry != null ? displays.FindIndex(d => d.Id == entry.displayType) : 0;
-            var dropdown = new DropdownField(displays.Select(d => d.DisplayName).ToList(), Mathf.Max(index, 0));
+            int index = entry != null ? displays.FindIndex(d => d.Key == entry.displayType) : 0;
+            var dropdown = new DropdownField(displays.Select(d => d.Value).ToList(), Mathf.Max(index, 0));
             dropdown.style.width = 180;
             dropdown.SetEnabled(entry != null);
 
             toggle.RegisterValueChangedCallback(e => {
                 Undo.RecordObject(layout, "Toggle Setting");
                 if (e.newValue) {
-                    int i = Mathf.Max(displays.FindIndex(d => d.DisplayName == dropdown.value), 0);
-                    entry = new EntryLayout { settingId = def.Id, displayType = displays[i].Id };
+                    int i = Mathf.Max(displays.FindIndex(d => d.Value == dropdown.value), 0);
+                    entry = new EntryLayout { settingId = item.Id, displayType = displays.Count > 0 ? displays[i].Key : null };
                     category.entries.Add(entry);
                 }
                 else {
@@ -240,15 +268,14 @@ namespace Arosoul.PlayerSettings.EditorTools {
 
             dropdown.RegisterValueChangedCallback(e => {
                 if (entry == null) return;
-                int i = displays.FindIndex(d => d.DisplayName == e.newValue);
+                int i = displays.FindIndex(d => d.Value == e.newValue);
                 if (i < 0) return;
                 Undo.RecordObject(layout, "Change Setting Display");
-                entry.displayType = displays[i].Id;
+                entry.displayType = displays[i].Key;
                 EditorUtility.SetDirty(layout);
             });
 
-            // A stored display type that no longer exists silently falls back to the default at runtime, show that here too.
-            if (entry != null && index < 0 && displays.Count > 0) entry.displayType = displays[0].Id;
+            if (entry != null && index < 0 && displays.Count > 0) entry.displayType = displays[0].Key;
 
             row.Add(toggle);
             row.Add(label);

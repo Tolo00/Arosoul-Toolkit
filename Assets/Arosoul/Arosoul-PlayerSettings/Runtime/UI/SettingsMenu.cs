@@ -45,8 +45,8 @@ namespace Arosoul.PlayerSettings {
             if (view != null) {
                 if (view.IsPromptOpen) { view.DismissPrompt(); return; }
 
-                if (GameSettings.Store.HasPending) {
-                    view.ShowPrompt(null, CloseNow);
+                if (view.HasPending) {
+                    view.ShowPrompt(CloseNow);
                     return;
                 }
             }

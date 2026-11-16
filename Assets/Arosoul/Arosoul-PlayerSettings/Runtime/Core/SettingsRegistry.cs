@@ -13,15 +13,24 @@ namespace Arosoul.PlayerSettings {
         static List<SettingDefinition> builtIn = new List<SettingDefinition>();
         static List<SettingDefinition> all = new List<SettingDefinition>();
         static Dictionary<string, SettingDefinition> byId = new Dictionary<string, SettingDefinition>(StringComparer.Ordinal);
+        static List<SettingSection> sections = new List<SettingSection>();
+        static Dictionary<string, SettingSection> sectionById = new Dictionary<string, SettingSection>(StringComparer.Ordinal);
         static bool built;
 
         public static IReadOnlyList<SettingDefinition> All { get { EnsureBuilt(); return all; } }
         public static IReadOnlyList<SettingDefinition> BuiltIn { get { EnsureBuilt(); return builtIn; } }
+        public static IReadOnlyList<SettingSection> Sections { get { EnsureBuilt(); return sections; } }
 
         public static bool TryGet(string id, out SettingDefinition definition) {
             EnsureBuilt();
             if (id == null) { definition = null; return false; }
             return byId.TryGetValue(id, out definition);
+        }
+
+        public static bool TryGetSection(string id, out SettingSection section) {
+            EnsureBuilt();
+            if (id == null) { section = null; return false; }
+            return sectionById.TryGetValue(id, out section);
         }
 
         /// <summary>Called by the generated CustomSettings class.</summary>
@@ -58,7 +67,30 @@ namespace Arosoul.PlayerSettings {
                 unique.Add(def);
             }
             all = unique;
+
+            BuildSections();
             built = true;
+        }
+
+        static void BuildSections() {
+            sections = new List<SettingSection>();
+            sectionById = new Dictionary<string, SettingSection>(StringComparer.Ordinal);
+
+            foreach (var provider in TypeDiscovery.CreateInstances<SettingSectionProvider>()) {
+                IEnumerable<SettingSection> provided;
+                try { provided = provider.GetSections()?.ToList(); }
+                catch (Exception e) { UnityEngine.Debug.LogException(e); continue; }
+                if (provided == null) continue;
+
+                foreach (var section in provided) {
+                    if (byId.ContainsKey(section.Id) || sectionById.ContainsKey(section.Id)) {
+                        UnityEngine.Debug.LogWarning($"[Settings] Duplicate id '{section.Id}' ignored.");
+                        continue;
+                    }
+                    sectionById.Add(section.Id, section);
+                    sections.Add(section);
+                }
+            }
         }
 
 #if UNITY_EDITOR

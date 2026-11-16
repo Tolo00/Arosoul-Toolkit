@@ -3,4 +3,5 @@
          If you add your own SettingDefinition / SettingDisplay subclasses in another assembly, preserve it here too. -->
     <assembly fullname="Arosoul.PlayerSettings" preserve="all"/>
     <assembly fullname="Arosoul.PlayerSettings.URP" preserve="all"/>
+    <assembly fullname="Arosoul.PlayerSettings.GameInput" preserve="all"/>
 </linker>

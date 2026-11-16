@@ -1,0 +1,7 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements">
+    <!-- Keybinds of one action map. Required: an element named "rows" that the rows are added to.  Optional: Label "title". -->
+    <ui:VisualElement class="rebind-section">
+        <ui:Label name="title" class="rebind-title" />
+        <ui:VisualElement name="rows" class="rebind-rows" />
+    </ui:VisualElement>
+</ui:UXML>

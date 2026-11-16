@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UIElements;
+using System.Linq;
 
 namespace Arosoul.PlayerSettings {
 
@@ -22,7 +23,8 @@ namespace Arosoul.PlayerSettings {
         readonly List<SettingBinding> bindings = new List<SettingBinding>();
         readonly List<Button> tabs = new List<Button>();
         readonly List<VisualElement> pages = new List<VisualElement>();
-        static readonly string[] NoIds = new string[0];
+        readonly List<CategoryState> states = new List<CategoryState>();
+        readonly List<SettingSection> allSections = new List<SettingSection>();
 
         int selectedTab = -1;
 
@@ -30,7 +32,7 @@ namespace Arosoul.PlayerSettings {
         Button applyButton, undoButton, resetButton;
 
         VisualElement window, promptOverlay;
-        IEnumerable<string> promptIds;
+        CategoryState promptScope;
         Action promptResolved;
 
 
@@ -38,16 +40,19 @@ namespace Arosoul.PlayerSettings {
         public bool IsVisible { get; private set; }
         public bool IsPromptOpen { get; private set; }
 
+        /// <summary>Any category has changes that are not applied yet (settings or sections).</summary>
+        public bool HasPending => store.HasPending || allSections.Any(s => s.HasPending);
+
         CategoryState CurrentState => selectedTab >= 0 && selectedTab < states.Count ? states[selectedTab] : null;
-        IEnumerable<string> CurrentIds => CurrentState != null ? CurrentState.Ids : (IEnumerable<string>)NoIds; // null would mean "all"
 
 
         sealed class CategoryState {
             public CategoryLayout Layout;
             public bool Instant;
             public readonly List<string> Ids = new List<string>();
+            public readonly List<KeyValuePair<SettingSection, string>> Sections = new List<KeyValuePair<SettingSection, string>>();
         }
-        readonly List<CategoryState> states = new List<CategoryState>();
+        
         
 
         public SettingsMenuView(VisualElement host, SettingsLayout layout, SettingsStore store) {
@@ -104,12 +109,16 @@ namespace Arosoul.PlayerSettings {
 
         public void Dispose() {
             store.StateChanged -= OnStateChanged;
+            foreach (var section in allSections) section.StateChanged -= OnStateChanged;
+
             root?.RemoveFromHierarchy();
             root = null;
             bindings.Clear();
             tabs.Clear();
             pages.Clear();
             states.Clear();
+            allSections.Clear();
+
             if (ownsTheme && theme != null) UnityEngine.Object.Destroy(theme);
         }
 
@@ -158,30 +167,58 @@ namespace Arosoul.PlayerSettings {
 
         void BuildEntries(CategoryState state, VisualElement container) {
             foreach (var entry in state.Layout.entries) {
-                if (!store.TryGetDefinition(entry.settingId, out var definition)) {
-                    // Either removed from the project or not available on this platform.
-                    if (!SettingsRegistry.TryGet(entry.settingId, out _)) {
-                        Debug.LogWarning($"[Settings] Layout '{layout.name}' references unknown setting '{entry.settingId}'.");
-                    }
+                if (store.TryGetDefinition(entry.settingId, out var definition)) {
+                    BuildSettingRow(state, entry, definition, container);
                     continue;
                 }
 
-                var display = SettingDisplays.Find(entry.displayType);
-                if (display == null || !display.Supports(definition.Type)) display = SettingDisplays.Default(definition.Type);
-                if (display == null) continue;
+                if (SettingsRegistry.TryGetSection(entry.settingId, out var section)) {
+                    BuildSection(state, entry, section, container);
+                    continue;
+                }
 
-                var asset = Template(theme.GetDisplayTemplate(display.Id), display.TemplateName);
-                if (asset == null) continue;
+                // Either removed from the project or not available on this platform.
+                if (!SettingsRegistry.TryGet(entry.settingId, out _)) {
+                    Debug.LogWarning($"[Settings] Layout '{layout.name}' references unknown setting '{entry.settingId}'.");
+                }
+            }
+        }
 
-                var row = asset.Instantiate();
-                var label = row.Q<Label>("label");
-                if (label != null) label.text = definition.DisplayName;
+        void BuildSettingRow(CategoryState state, EntryLayout entry, SettingDefinition definition, VisualElement container) {
+            var display = SettingDisplays.Find(entry.displayType);
+            if (display == null || !display.Supports(definition.Type)) display = SettingDisplays.Default(definition.Type);
+            if (display == null) return;
 
-                var binding = new SettingBinding(store, definition, state.Instant);
-                bindings.Add(binding);
-                state.Ids.Add(definition.Id);
-                display.Bind(row, binding);
-                container.Add(row);
+            var asset = Template(theme.GetDisplayTemplate(display.Id), display.TemplateName);
+            if (asset == null) return;
+
+            var row = asset.Instantiate();
+            var label = row.Q<Label>("label");
+            if (label != null) label.text = definition.DisplayName;
+
+            var binding = new SettingBinding(store, definition, state.Instant);
+            bindings.Add(binding);
+            state.Ids.Add(definition.Id);
+            display.Bind(row, binding);
+            container.Add(row);
+        }
+
+        void BuildSection(CategoryState state, EntryLayout entry, SettingSection section, VisualElement container) {
+            string displayId = section.Displays.Any(d => d.Id == entry.displayType) ? entry.displayType : section.Displays.FirstOrDefault()?.Id;
+            if (displayId == null) return;
+
+            var context = new SectionContext(displayId, state.Instant, theme.IncludeDefaultStyle,
+                name => Template(theme.GetDisplayTemplate(name), name));
+
+            var element = section.Build(context);
+            if (element == null) return;
+
+            container.Add(element);
+            state.Sections.Add(new KeyValuePair<SettingSection, string>(section, displayId));
+
+            if (!allSections.Contains(section)) {
+                allSections.Add(section);
+                section.StateChanged += OnStateChanged;
             }
         }
 
@@ -191,12 +228,9 @@ namespace Arosoul.PlayerSettings {
             if (footer == null || buttonAsset == null) return;
 
             // All three act on the selected category only. RefreshFooter shows/hides them per category.
-            applyButton = AddButton(footer, buttonAsset, "Apply", "settings-button--apply", () => store.ApplyPending(CurrentIds));
-            undoButton = AddButton(footer, buttonAsset, "Undo", "settings-button--undo", () => store.RevertPending(CurrentIds));
-            resetButton = AddButton(footer, buttonAsset, "Reset", "settings-button--reset", () => {
-                var state = CurrentState;
-                if (state != null) store.ResetToDefaults(state.Ids, state.Instant);
-            });
+            applyButton = AddButton(footer, buttonAsset, "Apply", "settings-button--apply", () => ApplyScope(CurrentState));
+            undoButton = AddButton(footer, buttonAsset, "Undo", "settings-button--undo", () => RevertScope(CurrentState));
+            resetButton = AddButton(footer, buttonAsset, "Reset", "settings-button--reset", () => ResetScope(CurrentState));
 
             if (layout.ShowCloseButton) {
                 AddButton(footer, buttonAsset, "Close", "settings-button--close", () => CloseRequested?.Invoke());
@@ -254,7 +288,7 @@ namespace Arosoul.PlayerSettings {
         void RefreshFooter() {
             var state = CurrentState;
             bool manual = state != null && !state.Instant;
-            bool pending = state != null && store.HasPendingIn(state.Ids);
+            bool pending = state != null && HasPendingIn(state);
 
             SetShown(applyButton, manual);
             SetShown(undoButton, manual);
@@ -265,6 +299,38 @@ namespace Arosoul.PlayerSettings {
 
         static void SetShown(Button button, bool shown) {
             if (button != null) button.style.display = shown ? DisplayStyle.Flex : DisplayStyle.None;
+        }
+
+        // A null scope means every category.
+        bool HasPendingIn(CategoryState scope) {
+            if (scope == null) return HasPending;
+            return store.HasPendingIn(scope.Ids) || scope.Sections.Any(s => s.Key.HasPending);
+        }
+
+        void ApplyScope(CategoryState scope) {
+            if (scope == null) {
+                store.ApplyPending();
+                foreach (var section in allSections) section.ApplyPending();
+                return;
+            }
+            store.ApplyPending(scope.Ids);
+            foreach (var pair in scope.Sections) pair.Key.ApplyPending();
+        }
+
+        void RevertScope(CategoryState scope) {
+            if (scope == null) {
+                store.RevertPending();
+                foreach (var section in allSections) section.RevertPending();
+                return;
+            }
+            store.RevertPending(scope.Ids);
+            foreach (var pair in scope.Sections) pair.Key.RevertPending();
+        }
+
+        void ResetScope(CategoryState scope) {
+            if (scope == null) return;
+            store.ResetToDefaults(scope.Ids, scope.Instant);
+            foreach (var pair in scope.Sections) pair.Key.ResetToDefaults(pair.Value, scope.Instant);
         }
 
 #endregion
@@ -298,21 +364,22 @@ namespace Arosoul.PlayerSettings {
             root.Add(promptOverlay); // sibling of the window, so disabling the window doesn't disable the prompt
         }
 
-        /// <summary>Asks whether to apply or discard pending changes, then calls onResolved.</summary>
-        /// <param name="ids">The settings the choice applies to. Null means all.</param>
-        public void ShowPrompt(IEnumerable<string> ids, Action onResolved) {
-            if (promptOverlay == null) {
-                store.RevertPending(ids);
+        /// <summary>Asks whether to apply or discard ALL pending changes, then calls onResolved.</summary>
+        public void ShowPrompt(Action onResolved) => ShowPrompt(null, onResolved);
+
+        void ShowPrompt(CategoryState scope, Action onResolved) {
+            if (promptOverlay == null) { // no prompt template available: discard silently
+                RevertScope(scope);
                 onResolved?.Invoke();
                 return;
             }
 
-            promptIds = ids;
+            promptScope = scope;
             promptResolved = onResolved;
             IsPromptOpen = true;
 
             promptOverlay.style.display = DisplayStyle.Flex;
-            window?.SetEnabled(false); // block keyboard / gamepad navigation into the menu
+            window?.SetEnabled(false);
             promptOverlay.Q<Button>("save").Focus();
         }
 
@@ -320,19 +387,19 @@ namespace Arosoul.PlayerSettings {
         public void DismissPrompt() => ClosePrompt();
 
         void ResolvePrompt(bool apply) {
-            var ids = promptIds;
+            var scope = promptScope;
             var next = promptResolved;
             ClosePrompt();
 
-            if (apply) store.ApplyPending(ids);
-            else store.RevertPending(ids);
+            if (apply) ApplyScope(scope);
+            else RevertScope(scope);
             next?.Invoke();
         }
 
         void ClosePrompt() {
             if (!IsPromptOpen) return;
             IsPromptOpen = false;
-            promptIds = null;
+            promptScope = null;
             promptResolved = null;
             promptOverlay.style.display = DisplayStyle.None;
             window?.SetEnabled(true);
@@ -342,7 +409,7 @@ namespace Arosoul.PlayerSettings {
             if (index == selectedTab || IsPromptOpen) return;
 
             var state = CurrentState;
-            if (state != null && store.HasPendingIn(state.Ids)) ShowPrompt(state.Ids, () => Select(index));
+            if (state != null && HasPendingIn(state)) ShowPrompt(state, () => Select(index));
             else Select(index);
         }
 

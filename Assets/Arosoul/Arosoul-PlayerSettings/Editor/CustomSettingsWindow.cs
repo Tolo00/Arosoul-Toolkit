@@ -94,7 +94,7 @@ namespace Arosoul.PlayerSettings.EditorTools {
                 virtualizationMethod = CollectionVirtualizationMethod.FixedHeight,
                 selectionType = SelectionType.None,
                 showAlternatingRowBackgrounds = AlternatingRowBackground.All,
-                sortingEnabled = false
+                sortingMode = ColumnSortingMode.None
             };
             table.style.flexGrow = 1;
 

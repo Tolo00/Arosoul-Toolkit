@@ -1,0 +1,20 @@
+{
+    "name": "Arosoul.PlayerSettings.GameInput",
+    "rootNamespace": "Arosoul.PlayerSettings",
+    "references": [
+        "Arosoul.PlayerSettings",
+        "GameInputSystem",
+        "Unity.InputSystem"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [
+        "GAMEINPUT_INSTALLED"
+    ],
+    "versionDefines": [],
+    "noEngineReferences": false
+}
