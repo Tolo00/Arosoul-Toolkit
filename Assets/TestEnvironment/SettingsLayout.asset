@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: SettingsLayout
   m_EditorClassIdentifier: Arosoul.PlayerSettings::Arosoul.PlayerSettings.SettingsLayout
   title: Settings
-  tabOrientation: 0
+  tabOrientation: 1
   showCloseButton: 1
   theme: {fileID: 0}
   categories:
@@ -21,25 +21,73 @@ MonoBehaviour:
     applyMode: 1
     showResetButton: 0
     entries:
+    - settingId: decoration:header
+      displayType: 
+      parameters:
+      - key: text
+        value: Cool Strings
+    - settingId: StringTest
+      displayType: text
+      parameters: []
+    - settingId: StringTest
+      displayType: text
+      parameters: []
+    - settingId: StringTest
+      displayType: text
+      parameters: []
+    - settingId: decoration:header
+      displayType: 
+      parameters:
+      - key: text
+        value: Not Cool Stuff
     - settingId: brightness
       displayType: slider
+      parameters: []
+    - settingId: decoration:separator
+      displayType: 
+      parameters: []
+    - settingId: MouseSensitivity
+      displayType: dropdown
+      parameters: []
+    - settingId: MouseSensitivity
+      displayType: option-stepper
+      parameters: []
   - name: Video
     applyMode: 0
     showResetButton: 1
     entries:
     - settingId: quality_level
       displayType: dropdown
+      parameters: []
     - settingId: display_mode
       displayType: dropdown
+      parameters: []
     - settingId: frame_rate_limit
       displayType: dropdown
+      parameters: []
     - settingId: resolution
       displayType: dropdown
+      parameters: []
     - settingId: vsync
       displayType: toggle
+      parameters: []
   - name: Sound
     applyMode: 1
     showResetButton: 0
     entries:
     - settingId: master_volume
       displayType: slider
+      parameters: []
+    - settingId: frame_rate_limit
+      displayType: option-stepper
+      parameters: []
+  - name: Controls
+    applyMode: 0
+    showResetButton: 1
+    entries:
+    - settingId: input:Player
+      displayType: keyboard
+      parameters: []
+    - settingId: input:Player
+      displayType: gamepad
+      parameters: []
