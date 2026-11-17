@@ -58,40 +58,46 @@ namespace Arosoul.PlayerSettings {
             var refreshers = new List<Action>();
             void RefreshAll() { foreach (var refresh in refreshers) refresh(); }
 
-            foreach (var entry in GameInputBindings.GetEntries(mapName, device)) {
+            foreach (var group in GroupEntries(GameInputBindings.GetEntries(mapName, device))) {
                 var row = rowAsset.Instantiate();
                 var label = row.Q<Label>("label");
-                var bindButton = row.Q<Button>("binding");
+                var bindingsContainer = row.Q("bindings");
                 var resetButton = row.Q<Button>("reset");
-                if (bindButton == null) { Debug.LogError("[Settings] Template 'Rebind_Row' needs a Button named 'binding'."); continue; }
+                if (bindingsContainer == null) { Debug.LogError("[Settings] Template 'Rebind_Row' needs an element named 'bindings'."); continue; }
 
-                if (label != null) label.text = entry.DisplayName;
-                refreshers.Add(() => bindButton.text = GameInputBindings.GetLabel(entry));
+                if (label != null) label.text = group[0].BaseName;
 
-                bool listening = false;
-                bindButton.clicked += () => {
-                    if (Time.unscaledTime < ignoreClicksUntil) return;
-                    if (listening) { GameInputBindings.CancelRebind(); return; }
+                foreach (var entry in group) {
+                    var bindButton = new Button();
+                    bindButton.AddToClassList("rebind-button");
+                    bindingsContainer.Add(bindButton);
+                    refreshers.Add(() => bindButton.text = GameInputBindings.GetLabel(entry));
 
-                    string before = GameInputBindings.GetMapJson(mapName);
-                    listening = true;
-                    bindButton.text = device == GameInput.DeviceType.Gamepad ? "Press a button..." : "Press a key...";
-                    bindButton.AddToClassList("rebind-button-listening");
+                    bool listening = false;
+                    bindButton.clicked += () => {
+                        if (Time.unscaledTime < ignoreClicksUntil) return;
+                        if (listening) { GameInputBindings.CancelRebind(); return; }
 
-                    GameInputBindings.StartRebind(entry, success => {
-                        listening = false;
-                        bindButton.RemoveFromClassList("rebind-button-listening");
-                        ignoreClicksUntil = Time.unscaledTime + 0.25f;
-                        if (success) MarkChanged(before, instant);
-                        RefreshAll();
-                    });
-                };
+                        string before = GameInputBindings.GetMapJson(mapName);
+                        listening = true;
+                        bindButton.text = device == GameInput.DeviceType.Gamepad ? "Press a button..." : "Press a key...";
+                        bindButton.AddToClassList("rebind-button-listening");
+
+                        GameInputBindings.StartRebind(entry, success => {
+                            listening = false;
+                            bindButton.RemoveFromClassList("rebind-button-listening");
+                            ignoreClicksUntil = Time.unscaledTime + 0.25f;
+                            if (success) MarkChanged(before, instant);
+                            RefreshAll();
+                        });
+                    };
+                }
 
                 if (resetButton != null) {
                     resetButton.clicked += () => {
                         if (Time.unscaledTime < ignoreClicksUntil) return;
                         string before = GameInputBindings.GetMapJson(mapName);
-                        GameInputBindings.ResetBinding(entry);
+                        foreach (var entry in group) GameInputBindings.ResetBinding(entry);
                         MarkChanged(before, instant);
                         RefreshAll();
                     };
@@ -117,6 +123,23 @@ namespace Arosoul.PlayerSettings {
 
             RefreshAll();
             return root;
+        }
+
+        // Bindings of the same action (and composite part) share one row, in their original order.
+        static List<List<RebindEntry>> GroupEntries(List<RebindEntry> entries) {
+            var groups = new List<List<RebindEntry>>();
+            var lookup = new Dictionary<string, List<RebindEntry>>();
+
+            foreach (var entry in entries) {
+                string key = entry.Action.name + "/" + entry.BaseName;
+                if (!lookup.TryGetValue(key, out var group)) {
+                    group = new List<RebindEntry>();
+                    lookup.Add(key, group);
+                    groups.Add(group);
+                }
+                group.Add(entry);
+            }
+            return groups;
         }
 
 #endregion

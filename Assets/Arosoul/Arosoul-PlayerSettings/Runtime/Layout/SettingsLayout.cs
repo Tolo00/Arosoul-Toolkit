@@ -14,9 +14,30 @@ namespace Arosoul.PlayerSettings {
     }
 
     [Serializable]
+    public sealed class EntryParameter {
+        public string key;
+        public string value;
+    }
+
+    [Serializable]
     public sealed class EntryLayout {
         public string settingId;
         public string displayType;
+        public List<EntryParameter> parameters = new List<EntryParameter>(); // used by decorations
+
+        public string GetParameter(string key) {
+            foreach (var p in parameters) if (p.key == key) return p.value;
+            return null;
+        }
+
+        public void SetParameter(string key, string value) {
+            foreach (var p in parameters) {
+                if (p.key != key) continue;
+                p.value = value;
+                return;
+            }
+            parameters.Add(new EntryParameter { key = key, value = value });
+        }
     }
 
     [Serializable]

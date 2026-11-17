@@ -107,3 +107,7 @@
 .settings-prompt-title { font-size: 20px; -unity-font-style: bold; color: rgb(240, 240, 245); margin-bottom: 8px; }
 .settings-prompt-message { white-space: normal; color: rgb(200, 202, 210); margin-bottom: 20px; -unity-text-align: middle-center; }
 .settings-prompt-buttons { flex-direction: row; justify-content: flex-end; }
+
+/* ---- Decorations ---- */
+.settings-header { font-size: 20px; -unity-font-style: bold; color: rgb(240, 240, 245); margin: 16px 8px 6px 8px; }
+.settings-separator { height: 1px; margin: 8px; background-color: rgba(255, 255, 255, 0.15); }

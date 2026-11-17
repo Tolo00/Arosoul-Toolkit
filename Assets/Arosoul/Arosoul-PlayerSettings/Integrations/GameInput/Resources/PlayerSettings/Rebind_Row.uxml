@@ -1,8 +1,8 @@
 <ui:UXML xmlns:ui="UnityEngine.UIElements">
-    <!-- One remappable binding. Required: Button "binding" (shows the current control, click to remap).  Optional: Label "label", Button "reset". -->
+    <!-- One remappable action. Required: element "bindings" (one button per binding is added to it, click to remap).  Optional: Label "label", Button "reset" (resets every binding of the action). -->
     <ui:VisualElement class="rebind-row">
         <ui:Label name="label" class="rebind-label" />
-        <ui:Button name="binding" class="rebind-button" />
+        <ui:VisualElement name="bindings" class="rebind-bindings" />
         <ui:Button name="reset" text="Reset" class="rebind-reset" />
     </ui:VisualElement>
 </ui:UXML>

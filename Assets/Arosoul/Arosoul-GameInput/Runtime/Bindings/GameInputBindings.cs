@@ -57,11 +57,12 @@ namespace GameInputSystem {
                     string name = NameUtil.Nicify(action.name);
                     if (b.isPartOfComposite) name += " " + NameUtil.Nicify(b.name);
 
+                    string baseName = name;
                     names.TryGetValue(name, out int count);
                     names[name] = count + 1;
                     if (count > 0) name += " #" + (count + 1);
 
-                    result.Add(new RebindEntry { MapName = mapName, Action = action, BindingIndex = i, Device = device, DisplayName = name });
+                    result.Add(new RebindEntry { MapName = mapName, Action = action, BindingIndex = i, Device = device, DisplayName = name, BaseName = baseName });
                 }
             }
             return result;

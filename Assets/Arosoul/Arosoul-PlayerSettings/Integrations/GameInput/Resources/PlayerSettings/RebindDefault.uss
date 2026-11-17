@@ -23,7 +23,8 @@
 
 .rebind-button {
     flex-grow: 1;
-    margin: 0;
+    flex-basis: 0;
+    margin: 0 4px 0 0;
     padding: 6px 12px;
     border-width: 0;
     border-radius: 6px;
@@ -42,3 +43,4 @@
     color: rgb(190, 192, 200);
 }
 .rebind-reset:hover { background-color: rgba(255, 255, 255, 0.16); }
+.rebind-bindings { flex-grow: 1; flex-direction: row; }

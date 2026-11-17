@@ -2,10 +2,10 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEditor;
-using UnityEditor.UIElements;
 using UnityEngine;
 using UnityEngine.UIElements;
 using UnityEditor.IMGUI.Controls;
+using System.Globalization;
 
 namespace Arosoul.PlayerSettings.EditorTools {
 
@@ -19,6 +19,7 @@ namespace Arosoul.PlayerSettings.EditorTools {
         sealed class CatalogItem {
             public string Id, Name, Group, Tooltip;
             public List<KeyValuePair<string, string>> Displays = new List<KeyValuePair<string, string>>(); // id, name
+            public LayoutDecoration Decoration;
         }
 
         List<CatalogItem> catalog = new List<CatalogItem>();
@@ -88,6 +89,10 @@ namespace Arosoul.PlayerSettings.EditorTools {
                 var item = new CatalogItem { Id = section.Id, Name = section.DisplayName, Group = section.Group, Tooltip = section.Id };
                 foreach (var display in section.Displays) item.Displays.Add(new KeyValuePair<string, string>(display.Id, display.Name));
                 items.Add(item);
+            }
+
+            foreach (var decoration in SettingsRegistry.Decorations) {
+                items.Add(new CatalogItem { Id = decoration.Id, Name = decoration.DisplayName, Group = decoration.Group, Tooltip = decoration.Id, Decoration = decoration });
             }
             return items;
         }
@@ -234,6 +239,7 @@ namespace Arosoul.PlayerSettings.EditorTools {
             row.Add(label);
 
             if (item != null) AddDisplayDropdown(row, item, entry);
+            if (item?.Decoration != null) AddParameterFields(row, item.Decoration, entry);
 
             var remove = new Button(() => RemoveEntry(category, entry)) { tooltip = "Remove" };
             remove.Add(new Image { image = EditorGUIUtility.IconContent("Toolbar Minus").image });
@@ -263,6 +269,35 @@ namespace Arosoul.PlayerSettings.EditorTools {
             row.Add(dropdown);
         }
 
+        void AddParameterFields(VisualElement row, LayoutDecoration decoration, EntryLayout entry) {
+            foreach (var parameter in decoration.Parameters) {
+                var p = parameter;
+                string current = entry.GetParameter(p.Key) ?? p.Default;
+
+                if (p.Kind == DecorationParameterKind.Number) {
+                    float.TryParse(current, NumberStyles.Float, CultureInfo.InvariantCulture, out float number);
+                    var field = new FloatField(p.Label) { value = number };
+                    field.RegisterValueChangedCallback(e => SetParameter(entry, p.Key, e.newValue.ToString(CultureInfo.InvariantCulture)));
+                    field.labelElement.style.minWidth = 40;
+                    field.style.width = 200;
+                    row.Add(field);
+                }
+                else {
+                    var field = new TextField(p.Label) { value = current };
+                    field.RegisterValueChangedCallback(e => SetParameter(entry, p.Key, e.newValue));
+                    field.labelElement.style.minWidth = 40;
+                    field.style.width = 200;
+                    row.Add(field);
+                }
+            }
+        }
+
+        void SetParameter(EntryLayout entry, string key, string value) {
+            Undo.RecordObject(layout, "Change Decoration");
+            entry.SetParameter(key, value);
+            EditorUtility.SetDirty(layout);
+        }
+
         void RemoveEntry(CategoryLayout category, EntryLayout entry) {
             Undo.RecordObject(layout, "Remove Entry");
             category.entries.Remove(entry); // reference equality, so duplicates are safe
@@ -287,7 +322,7 @@ namespace Arosoul.PlayerSettings.EditorTools {
             dropdown.Show(buttonRect);
         }
 
-        static int GroupOrder(string group) => group == "Custom" ? 1 : 0;
+        static int GroupOrder(string group) => group == "Custom" ? 1 : group == "Decorations" ? 2 : 0;
 
         sealed class AddDropdown : AdvancedDropdown {
             sealed class Item : AdvancedDropdownItem {

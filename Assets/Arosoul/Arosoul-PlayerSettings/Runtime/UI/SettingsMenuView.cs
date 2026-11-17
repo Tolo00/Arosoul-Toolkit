@@ -177,6 +177,12 @@ namespace Arosoul.PlayerSettings {
                     continue;
                 }
 
+                if (SettingsRegistry.TryGetDecoration(entry.settingId, out var decoration)) {
+                    var element = decoration.Build(new DecorationContext(entry, decoration.Parameters));
+                    if (element != null) container.Add(element);
+                    continue;
+                }
+
                 // Either removed from the project or not available on this platform.
                 if (!SettingsRegistry.TryGet(entry.settingId, out _)) {
                     Debug.LogWarning($"[Settings] Layout '{layout.name}' references unknown setting '{entry.settingId}'.");

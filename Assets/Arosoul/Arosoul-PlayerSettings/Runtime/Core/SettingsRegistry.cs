@@ -15,11 +15,14 @@ namespace Arosoul.PlayerSettings {
         static Dictionary<string, SettingDefinition> byId = new Dictionary<string, SettingDefinition>(StringComparer.Ordinal);
         static List<SettingSection> sections = new List<SettingSection>();
         static Dictionary<string, SettingSection> sectionById = new Dictionary<string, SettingSection>(StringComparer.Ordinal);
+        static List<LayoutDecoration> decorations = new List<LayoutDecoration>();
+        static Dictionary<string, LayoutDecoration> decorationById = new Dictionary<string, LayoutDecoration>(StringComparer.Ordinal);
         static bool built;
 
         public static IReadOnlyList<SettingDefinition> All { get { EnsureBuilt(); return all; } }
         public static IReadOnlyList<SettingDefinition> BuiltIn { get { EnsureBuilt(); return builtIn; } }
         public static IReadOnlyList<SettingSection> Sections { get { EnsureBuilt(); return sections; } }
+        public static IReadOnlyList<LayoutDecoration> Decorations { get { EnsureBuilt(); return decorations; } }
 
         public static bool TryGet(string id, out SettingDefinition definition) {
             EnsureBuilt();
@@ -31,6 +34,12 @@ namespace Arosoul.PlayerSettings {
             EnsureBuilt();
             if (id == null) { section = null; return false; }
             return sectionById.TryGetValue(id, out section);
+        }
+
+        public static bool TryGetDecoration(string id, out LayoutDecoration decoration) {
+            EnsureBuilt();
+            if (id == null) { decoration = null; return false; }
+            return decorationById.TryGetValue(id, out decoration);
         }
 
         /// <summary>Called by the generated CustomSettings class.</summary>
@@ -69,6 +78,7 @@ namespace Arosoul.PlayerSettings {
             all = unique;
 
             BuildSections();
+            BuildDecorations();
             built = true;
         }
 
@@ -90,6 +100,20 @@ namespace Arosoul.PlayerSettings {
                     sectionById.Add(section.Id, section);
                     sections.Add(section);
                 }
+            }
+        }
+
+        static void BuildDecorations() {
+            decorations = new List<LayoutDecoration>();
+            decorationById = new Dictionary<string, LayoutDecoration>(StringComparer.Ordinal);
+
+            foreach (var decoration in TypeDiscovery.CreateInstances<LayoutDecoration>()) {
+                if (byId.ContainsKey(decoration.Id) || sectionById.ContainsKey(decoration.Id) || decorationById.ContainsKey(decoration.Id)) {
+                    UnityEngine.Debug.LogWarning($"[Settings] Duplicate id '{decoration.Id}' ignored.");
+                    continue;
+                }
+                decorationById.Add(decoration.Id, decoration);
+                decorations.Add(decoration);
             }
         }
 
