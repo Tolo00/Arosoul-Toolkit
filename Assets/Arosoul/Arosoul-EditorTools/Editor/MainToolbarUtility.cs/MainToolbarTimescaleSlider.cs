@@ -7,7 +7,7 @@ public class MainToolbarTimescaleSlider
 {
     const float k_minTimeScale = 0f, k_maxTimeScale = 5f;
 
-    [MainToolbarElement("Timescale/Slider", defaultDockPosition = MainToolbarDockPosition.Middle)]
+    [MainToolbarElement("Editor Utility/Timescale/Slider", defaultDockPosition = MainToolbarDockPosition.Middle)]
     public static MainToolbarElement TimeSlider()
     {
         MainToolbarElementStyler.StyleElement<VisualElement>("Timescale/Slider", (element) =>
@@ -24,7 +24,7 @@ public class MainToolbarTimescaleSlider
         );
     }
 
-    [MainToolbarElement("Timescale/Reset", defaultDockPosition = MainToolbarDockPosition.Middle)]
+    [MainToolbarElement("Editor Utility/Timescale/Reset", defaultDockPosition = MainToolbarDockPosition.Middle)]
     public static MainToolbarElement ResetTimeScaleButton()
     {
         MainToolbarElementStyler.StyleElement<UnityEditor.Toolbars.EditorToolbarButton>("Timescale/Reset", element =>

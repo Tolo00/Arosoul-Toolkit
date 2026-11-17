@@ -4,7 +4,7 @@ using UnityEngine;
 
 public static class MainToolbarButtons
 {
-    [MainToolbarElement("Project/Open Project Settings", defaultDockPosition = MainToolbarDockPosition.Middle)]
+    [MainToolbarElement("Editor Utility/Open Project Settings", defaultDockPosition = MainToolbarDockPosition.Middle)]
     public static MainToolbarButton ProjectSettingsButton()
     {
         var icon = EditorGUIUtility.IconContent("SettingsIcon").image as Texture2D;
