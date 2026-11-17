@@ -49,7 +49,6 @@ namespace Arosoul.PlayerSettings {
         }
 
         // Reading / writing
-
         public static T Get<T>(string id) {
             object value = Store.GetApplied(id);
             if (value is T typed) return typed;

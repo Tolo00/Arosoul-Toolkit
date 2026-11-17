@@ -30,6 +30,6 @@ Drop the folder into `Assets/` (or a package). Needs the UI Toolkit runtime (bui
 ## Behaviour notes
 * Apply mode and the Reset button are set per category. In a manual category, edits are staged and Apply / Undo / Reset only touch that category's settings (Reset stages the defaults, press Apply). In an instant category every change applies immediately and Reset applies immediately.
 * Custom setting ids are the API names, so renaming one resets its saved value. Min/Max always clamp int and float settings.
-* Layout entries render in the order they were toggled on. Untick and re-tick to move one to the end.
+* Layout entries render in the order shown in the layout editor (drag to reorder). The same setting can be added more than once to a category.
 * Brightness needs `com.unity.render-pipelines.universal` (version define in the URP asmdef). Verify the asmdef assembly names if your 6.6 URP differs.
 * Music/SFX volume are not built in because they need your AudioMixer: make them custom float settings and read them from your audio code.

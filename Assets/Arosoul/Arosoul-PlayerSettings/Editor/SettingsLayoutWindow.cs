@@ -5,6 +5,7 @@ using UnityEditor;
 using UnityEditor.UIElements;
 using UnityEngine;
 using UnityEngine.UIElements;
+using UnityEditor.IMGUI.Controls;
 
 namespace Arosoul.PlayerSettings.EditorTools {
 
@@ -13,8 +14,6 @@ namespace Arosoul.PlayerSettings.EditorTools {
     /// grouped and searchable, with a toggle (include in this category) and a dropdown (how it is displayed).
     /// </summary>
     public sealed class SettingsLayoutWindow : EditorWindow {
-        const string MissingGroup = "Missing (no longer exist)";
-
         [SerializeField] SettingsLayout layout;
 
         sealed class CatalogItem {
@@ -25,7 +24,8 @@ namespace Arosoul.PlayerSettings.EditorTools {
         List<CatalogItem> catalog = new List<CatalogItem>();
 
         int selected = -1;
-        string search = string.Empty;
+        ListView entryList;
+        readonly AdvancedDropdownState dropdownState = new AdvancedDropdownState();
         ListView categoryList;
         VisualElement rightPane;
         
@@ -197,110 +197,138 @@ namespace Arosoul.PlayerSettings.EditorTools {
             });
             rightPane.Add(resetToggle);
 
-            var list = new ScrollView();
-            list.style.flexGrow = 1;
+            Button addButton = null;
+            addButton = new Button(() => ShowAddMenu(category, addButton.worldBound)) { text = "Add" };
+            addButton.style.marginTop = 4;
+            addButton.style.marginBottom = 4;
+            rightPane.Add(addButton);
 
-            var searchField = new ToolbarSearchField { value = search };
-            searchField.style.marginTop = 4;
-            searchField.style.marginBottom = 4;
-            searchField.style.width = Length.Auto();
-            searchField.RegisterValueChangedCallback(e => { search = e.newValue ?? string.Empty; FillList(list, category); });
-            rightPane.Add(searchField);
-            rightPane.Add(list);
-
-            FillList(list, category);
+            entryList = new ListView {
+                itemsSource = category.entries,
+                reorderable = true,
+                reorderMode = ListViewReorderMode.Animated,
+                virtualizationMethod = CollectionVirtualizationMethod.DynamicHeight,
+                selectionType = SelectionType.None,
+                showBorder = true,
+                showAlternatingRowBackgrounds = AlternatingRowBackground.ContentOnly,
+                makeItem = NewRow,
+                bindItem = (e, i) => BindEntry(e, category, category.entries[i])
+            };
+            entryList.style.flexGrow = 1;
+            entryList.itemIndexChanged += (from, to) => EditorUtility.SetDirty(layout); // no Undo for reorder, same as categories
+            rightPane.Add(entryList);
         }
 
-        void FillList(ScrollView list, CategoryLayout category) {
-            list.Clear();
+        void BindEntry(VisualElement row, CategoryLayout category, EntryLayout entry) {
+            row.Clear();
+            row.style.paddingLeft = 4;
+            row.style.paddingRight = 4;
 
-            bool Matches(string text) => text != null && text.IndexOf(search, StringComparison.OrdinalIgnoreCase) >= 0;
+            var item = catalog.Find(c => c.Id == entry.settingId);
 
-            var groups = catalog
-                .Where(i => search.Length == 0 || Matches(i.Name) || Matches(i.Id) || Matches(i.Group))
-                .GroupBy(i => i.Group)
-                .OrderBy(g => g.Key == "Custom" ? 1 : 0).ThenBy(g => g.Key, StringComparer.Ordinal);
-
-            foreach (var group in groups) {
-                var foldout = new Foldout { text = group.Key, value = true };
-                foreach (var item in group.OrderBy(i => i.Name, StringComparer.Ordinal)) foldout.Add(MakeRow(category, item));
-                list.Add(foldout);
-            }
-
-            var missing = category.entries
-                .Where(e => !catalog.Any(i => i.Id == e.settingId) && (search.Length == 0 || Matches(e.settingId)))
-                .ToList();
-            if (missing.Count > 0) {
-                var foldout = new Foldout { text = MissingGroup, value = true };
-                foreach (var entry in missing) foldout.Add(MakeMissingRow(category, entry));
-                list.Add(foldout);
-            }
-        }
-
-        VisualElement MakeRow(CategoryLayout category, CatalogItem item) {
-            var entry = category.entries.Find(e => e.settingId == item.Id);
-            var displays = item.Displays;
-
-            var row = NewRow();
-            var toggle = new Toggle { value = entry != null };
-            var label = new Label(item.Name) { tooltip = item.Tooltip };
+            var label = new Label(item != null ? item.Name : entry.settingId) {
+                tooltip = item != null ? item.Tooltip : "This setting no longer exists. Remove it from the category."
+            };
             label.style.flexGrow = 1;
+            if (item == null) label.style.color = new Color(1f, 0.45f, 0.45f);
+            row.Add(label);
 
-            int index = entry != null ? displays.FindIndex(d => d.Key == entry.displayType) : 0;
-            var dropdown = new DropdownField(displays.Select(d => d.Value).ToList(), Mathf.Max(index, 0));
-            dropdown.style.width = 180;
-            dropdown.SetEnabled(entry != null);
+            if (item != null) AddDisplayDropdown(row, item, entry);
 
-            toggle.RegisterValueChangedCallback(e => {
-                Undo.RecordObject(layout, "Toggle Setting");
-                if (e.newValue) {
-                    int i = Mathf.Max(displays.FindIndex(d => d.Value == dropdown.value), 0);
-                    entry = new EntryLayout { settingId = item.Id, displayType = displays.Count > 0 ? displays[i].Key : null };
-                    category.entries.Add(entry);
-                }
-                else {
-                    category.entries.Remove(entry);
-                    entry = null;
-                }
-                dropdown.SetEnabled(e.newValue);
+            var remove = new Button(() => RemoveEntry(category, entry)) { tooltip = "Remove" };
+            remove.Add(new Image { image = EditorGUIUtility.IconContent("Toolbar Minus").image });
+            row.Add(remove);
+        }
+
+        void AddDisplayDropdown(VisualElement row, CatalogItem item, EntryLayout entry) {
+            var displays = item.Displays;
+            if (displays.Count == 0) return;
+
+            int index = displays.FindIndex(d => d.Key == entry.displayType);
+            if (index < 0) {
+                index = 0;
+                entry.displayType = displays[0].Key;
                 EditorUtility.SetDirty(layout);
-            });
+            }
 
+            var dropdown = new DropdownField(displays.Select(d => d.Value).ToList(), index);
+            dropdown.style.width = 180;
             dropdown.RegisterValueChangedCallback(e => {
-                if (entry == null) return;
                 int i = displays.FindIndex(d => d.Value == e.newValue);
                 if (i < 0) return;
                 Undo.RecordObject(layout, "Change Setting Display");
                 entry.displayType = displays[i].Key;
                 EditorUtility.SetDirty(layout);
             });
-
-            if (entry != null && index < 0 && displays.Count > 0) entry.displayType = displays[0].Key;
-
-            row.Add(toggle);
-            row.Add(label);
             row.Add(dropdown);
-            return row;
         }
 
-        VisualElement MakeMissingRow(CategoryLayout category, EntryLayout entry) {
-            var row = NewRow();
-            var toggle = new Toggle { value = true };
-            var label = new Label(entry.settingId) { tooltip = "This setting no longer exists. Untick to remove it from the category." };
-            label.style.flexGrow = 1;
-            label.style.color = new Color(1f, 0.45f, 0.45f);
+        void RemoveEntry(CategoryLayout category, EntryLayout entry) {
+            Undo.RecordObject(layout, "Remove Entry");
+            category.entries.Remove(entry); // reference equality, so duplicates are safe
+            EditorUtility.SetDirty(layout);
+            entryList.RefreshItems();
+        }
 
-            toggle.RegisterValueChangedCallback(e => {
-                if (e.newValue) return;
-                Undo.RecordObject(layout, "Remove Missing Setting");
-                category.entries.Remove(entry);
+        void ShowAddMenu(CategoryLayout category, Rect buttonRect) {
+            var dropdown = new AddDropdown(dropdownState, catalog, id => {
+                var item = catalog.Find(c => c.Id == id);
+                if (item == null) return;
+
+                Undo.RecordObject(layout, "Add Entry");
+                category.entries.Add(new EntryLayout {
+                    settingId = item.Id,
+                    displayType = item.Displays.Count > 0 ? item.Displays[0].Key : null
+                });
                 EditorUtility.SetDirty(layout);
-                row.RemoveFromHierarchy();
+                entryList.RefreshItems();
+                entryList.schedule.Execute(() => entryList.ScrollToItem(-1));
             });
+            dropdown.Show(buttonRect);
+        }
 
-            row.Add(toggle);
-            row.Add(label);
-            return row;
+        static int GroupOrder(string group) => group == "Custom" ? 1 : 0;
+
+        sealed class AddDropdown : AdvancedDropdown {
+            sealed class Item : AdvancedDropdownItem {
+                public readonly string Id;
+                public Item(string id, string name) : base(name) { Id = id; }
+            }
+
+            readonly List<CatalogItem> items;
+            readonly Action<string> onSelected;
+
+            public AddDropdown(AdvancedDropdownState state, List<CatalogItem> items, Action<string> onSelected) : base(state) {
+                this.items = items;
+                this.onSelected = onSelected;
+                minimumSize = new Vector2(260, 320);
+            }
+
+            protected override AdvancedDropdownItem BuildRoot() {
+                var root = new AdvancedDropdownItem("Add");
+                var groups = new Dictionary<string, AdvancedDropdownItem>(StringComparer.Ordinal);
+
+                AdvancedDropdownItem GetGroup(string path) {
+                    if (groups.TryGetValue(path, out var found)) return found;
+
+                    int slash = path.LastIndexOf('/');
+                    var parent = slash < 0 ? root : GetGroup(path.Substring(0, slash));
+                    var created = new AdvancedDropdownItem(slash < 0 ? path : path.Substring(slash + 1));
+                    parent.AddChild(created);
+                    groups.Add(path, created);
+                    return created;
+                }
+
+                foreach (var item in items.OrderBy(i => GroupOrder(i.Group)).ThenBy(i => i.Group, StringComparer.Ordinal).ThenBy(i => i.Name, StringComparer.Ordinal)) {
+                    var parent = string.IsNullOrEmpty(item.Group) ? root : GetGroup(item.Group);
+                    parent.AddChild(new Item(item.Id, item.Name));
+                }
+                return root;
+            }
+
+            protected override void ItemSelected(AdvancedDropdownItem item) {
+                if (item is Item leaf) onSelected(leaf.Id);
+            }
         }
 
         static VisualElement NewRow() {

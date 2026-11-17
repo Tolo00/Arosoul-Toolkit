@@ -1,7 +1,7 @@
-# Game Input (rewrite)
+# Game Input
 
-A thin wrapper on the Unity Input System for singleplayer games. No generated wrapper class, no partial classes,
-no registration file: you edit actions in Unity's own **Input Actions editor** and `GameActions` is generated for you.
+A thin wrapper on the Unity Input System for singleplayer games.
+Edit actions in Unity's own **Input Actions editor** and `GameActions` is generated for you.
 
 ## Setup
 1. `Tools > Game Input > Create Config` (creates `Assets/Resources/GameInputConfig.asset`).
@@ -38,9 +38,3 @@ Keyboard bindings can only become keyboard/mouse controls and gamepad bindings g
 more can be locked in the config. Saved to `input-bindings.json` per map. With *Swap* conflicts, taking a control that another action uses gives that action your old one.
 Cancel with Escape (keyboard) or Start (gamepad), configurable. The Player Settings integration builds the UI for this.
 
-## Migrating from the old version
-* Rename the old `Back` action to `BackPriority`. Everything else keeps its name.
-* `GameInput.MoveAction` => `GameActions.Player.Move` (actions are grouped by map).
-* `GameInput.Inst` is gone, everything is static. Keep `GameInput.ActiveDevice`, `SetMouseVisibilityPreference`, `OnActiveDeviceChanged`.
-* Delete `InputActions.cs` (the generated wrapper), `GameInput_Register.cs`, `GameInput_Config.cs`. Config values moved to the config asset.
-* `GameInput` defines the scripting symbol `GAMEINPUT_INSTALLED` (all main platforms) so integrations compile only when it is present.

@@ -198,7 +198,7 @@ namespace Arosoul.PlayerSettings {
 
             var binding = new SettingBinding(store, definition, state.Instant);
             bindings.Add(binding);
-            state.Ids.Add(definition.Id);
+            if (!state.Ids.Contains(definition.Id)) state.Ids.Add(definition.Id);
             display.Bind(row, binding);
             container.Add(row);
         }
