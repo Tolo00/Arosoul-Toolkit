@@ -12,6 +12,7 @@ namespace Arosoul.PlayerSettings {
             if (toggle == null) return;
 
             var valueLabel = root.Q<Label>("value"); // optional "On" / "Off" text
+            OnArrows(toggle, binding.Nudge);
             toggle.RegisterValueChangedCallback(e => binding.SetValue(e.newValue));
 
             void Refresh() {

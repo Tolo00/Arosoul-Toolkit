@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using UnityEngine;
 
 namespace Arosoul.PlayerSettings {
 
@@ -42,6 +43,38 @@ namespace Arosoul.PlayerSettings {
         public void SetValue(object value) {
             if (instant) store.Set(Id, value);
             else store.SetPending(Id, value);
+        }
+
+        /// <summary>Keyboard/controller adjustment: previous/next option, one step, or off/on.</summary>
+        public void Nudge(int direction) {
+            direction = Math.Sign(direction);
+            if (direction == 0) return;
+
+            switch (Type) {
+                case SettingType.Bool:
+                    SetValue(direction > 0);
+                    break;
+
+                case SettingType.Enum: {
+                    var options = Options;
+                    if (options.Count == 0) return;
+                    int index = Mathf.Clamp(SettingValues.IndexOf(options, StringValue) + direction, 0, options.Count - 1);
+                    SetValue(options[index]);
+                    break;
+                }
+
+                case SettingType.Int:
+                case SettingType.Float: {
+                    bool isInt = Type == SettingType.Int;
+                    float step = Step;
+                    float v = FloatValue + direction * step;
+                    if (!isInt) v = Min + Mathf.Round((v - Min) / step) * step; // stay on the step grid
+                    v = Mathf.Clamp(v, Min, Max);
+                    if (isInt) SetValue(Mathf.RoundToInt(v));
+                    else SetValue(v);
+                    break;
+                }
+            }
         }
 
         internal void NotifyValueChanged() => ValueChanged?.Invoke();

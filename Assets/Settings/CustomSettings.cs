@@ -12,9 +12,9 @@ namespace Arosoul.PlayerSettings {
     [GeneratedSettings]
     public static class CustomSettings {
 
-        /// <summary>Cool String</summary>
-        public static string StringTest {
-            get => GameSettings.Get<string>("StringTest");
+        /// <summary>Cool Int</summary>
+        public static int StringTest {
+            get => GameSettings.Get<int>("StringTest");
             set => GameSettings.Set("StringTest", value);
         }
 
@@ -26,7 +26,7 @@ namespace Arosoul.PlayerSettings {
 
         /// <summary>Parameters of every setting. The editor window reads this back.</summary>
         public static readonly CustomSettingData[] Data = {
-            new CustomSettingData { apiName = "StringTest", displayName = "Cool String", type = SettingType.String, min = 0f, max = 1f, defaultValue = "HEllo" },
+            new CustomSettingData { apiName = "StringTest", displayName = "Cool Int", type = SettingType.Int, min = 0f, max = 100f, defaultValue = "0" },
             new CustomSettingData { apiName = "MouseSensitivity", displayName = "Mouse Sensitivity", type = SettingType.Enum, min = 0f, max = 5f, defaultValue = "Off", options = new[] { "Off", "On", "Maybe" } },
         };
 

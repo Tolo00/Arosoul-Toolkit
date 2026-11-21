@@ -32,6 +32,11 @@ namespace Arosoul.PlayerSettings {
             Teardown();
         }
 
+        void Update()
+        {
+            view?.Tick();   
+        }
+
         public void Open() {
             wantVisible = true;
             view?.Show();

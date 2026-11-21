@@ -15,16 +15,14 @@ namespace Arosoul.PlayerSettings {
             var increase = Require<Button>(root, "increase");
             if (decrease == null || increase == null) return;
 
+            UseRowAsFocusTarget(root, decrease, increase);
+            OnArrows(RowOf(root), binding.Nudge);
+
             var valueLabel = root.Q<Label>("value");
             var options = binding.Options;
 
-            void Nudge(int direction) {
-                int index = Mathf.Clamp(IndexOf(options, binding.StringValue) + direction, 0, options.Count - 1);
-                binding.SetValue(options[index]);
-            }
-
-            decrease.clicked += () => Nudge(-1);
-            increase.clicked += () => Nudge(1);
+            decrease.clicked += () => binding.Nudge(-1);
+            increase.clicked += () => binding.Nudge(1);
 
             void Refresh() {
                 int index = IndexOf(options, binding.StringValue);

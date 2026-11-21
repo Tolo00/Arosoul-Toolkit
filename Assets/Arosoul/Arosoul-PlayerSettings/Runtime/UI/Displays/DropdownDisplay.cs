@@ -9,21 +9,24 @@ namespace Arosoul.PlayerSettings {
         public override bool Supports(SettingType type) => type == SettingType.Enum;
 
         public override void Bind(VisualElement root, SettingBinding binding) {
-            var dropdown = Require<DropdownField>(root, "dropdown");
-            if (dropdown == null) return;
+            var field = Require<VisualElement>(root, "dropdown");
+            if (field == null) return;
+
+            var button = new Button { name = "dropdown" };
+            foreach (var c in field.GetClasses()) button.AddToClassList(c);
+            button.AddToClassList("setting-dropdown-button");
+            field.parent.Insert(field.parent.IndexOf(field), button);
+            field.RemoveFromHierarchy();
 
             var options = binding.Options;
             var labels = options.Select(binding.GetOptionLabel).ToList();
-            dropdown.choices = labels;
 
-            dropdown.RegisterValueChangedCallback(e => {
-                int index = labels.IndexOf(e.newValue);
-                if (index >= 0) binding.SetValue(options[index]);
-            });
+            button.clicked += () => DropdownPopup.Open(button, labels, IndexOf(options, binding.StringValue), i => binding.SetValue(options[i]));
+            OnArrows(button, binding.Nudge);
 
             void Refresh() {
                 int index = IndexOf(options, binding.StringValue);
-                dropdown.SetValueWithoutNotify(index >= 0 ? labels[index] : string.Empty);
+                button.text = index >= 0 ? labels[index] : string.Empty;
             }
             binding.ValueChanged += Refresh;
             Refresh();

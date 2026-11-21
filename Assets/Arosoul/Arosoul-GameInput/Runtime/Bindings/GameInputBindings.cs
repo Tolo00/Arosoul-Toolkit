@@ -190,6 +190,12 @@ namespace GameInputSystem {
             BindingsChanged?.Invoke(entry.MapName);
         }
 
+        /// <summary>True while the binding uses its default control (no override, or an override equal to the default).</summary>
+        public static bool IsDefault(RebindEntry entry) {
+            var binding = entry.Action.bindings[entry.BindingIndex];
+            return binding.effectivePath == binding.path;
+        }
+
         public static void ResetMap(string mapName) {
             var map = GameInputRuntime.Asset?.FindActionMap(mapName, false);
             if (map == null) return;

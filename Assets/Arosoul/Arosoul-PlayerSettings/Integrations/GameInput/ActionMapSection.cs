@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using GameInputSystem;
 using UnityEngine;
 using UnityEngine.UIElements;
@@ -60,6 +61,7 @@ namespace Arosoul.PlayerSettings {
 
             foreach (var group in GroupEntries(GameInputBindings.GetEntries(mapName, device))) {
                 var row = rowAsset.Instantiate();
+                SettingsNavigation.MarkRow(row);
                 var label = row.Q<Label>("label");
                 var bindingsContainer = row.Q("bindings");
                 var resetButton = row.Q<Button>("reset");
@@ -67,10 +69,12 @@ namespace Arosoul.PlayerSettings {
 
                 if (label != null) label.text = group[0].BaseName;
 
+                Button firstButton = null;
                 foreach (var entry in group) {
                     var bindButton = new Button();
                     bindButton.AddToClassList("rebind-button");
                     bindingsContainer.Add(bindButton);
+                    firstButton ??= bindButton;
                     refreshers.Add(() => bindButton.text = GameInputBindings.GetLabel(entry));
 
                     bool listening = false;
@@ -83,23 +87,27 @@ namespace Arosoul.PlayerSettings {
                         bindButton.text = device == GameInput.DeviceType.Gamepad ? "Press a button..." : "Press a key...";
                         bindButton.AddToClassList("rebind-button-listening");
 
-                        GameInputBindings.StartRebind(entry, success => {
+                        if (GameInputBindings.StartRebind(entry, success => {
+                            SettingsNavigation.EndCapture(); // menu navigation ignores input while a key is being captured
                             listening = false;
                             bindButton.RemoveFromClassList("rebind-button-listening");
                             ignoreClicksUntil = Time.unscaledTime + 0.25f;
                             if (success) MarkChanged(before, instant);
                             RefreshAll();
-                        });
+                        })) SettingsNavigation.BeginCapture();
                     };
                 }
 
                 if (resetButton != null) {
+                    refreshers.Add(() => resetButton.SetEnabled(group.Any(e => !GameInputBindings.IsDefault(e)))); // disabled buttons are skipped by navigation
+
                     resetButton.clicked += () => {
                         if (Time.unscaledTime < ignoreClicksUntil) return;
                         string before = GameInputBindings.GetMapJson(mapName);
                         foreach (var entry in group) GameInputBindings.ResetBinding(entry);
                         MarkChanged(before, instant);
                         RefreshAll();
+                        firstButton?.Focus(); // the reset button just became disabled, don't leave focus on it
                     };
                 }
 

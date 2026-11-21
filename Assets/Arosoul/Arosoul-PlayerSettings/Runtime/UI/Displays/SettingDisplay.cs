@@ -36,6 +36,28 @@ namespace Arosoul.PlayerSettings {
         }
 
         protected static int IndexOf(IReadOnlyList<string> list, string value) => SettingValues.IndexOf(list, value);
+
+        /// <summary>Return the top element of the template instance (the row itself).</summary>
+        protected static VisualElement RowOf(VisualElement root) => root.childCount == 1 ? root[0] : root;
+
+        /// <summary>Makes the whole row the focus target instead of its buttons. The buttons stay clickable with the mouse.</summary>
+        protected static void UseRowAsFocusTarget(VisualElement root, params VisualElement[] buttons) {
+            var row = RowOf(root);
+            row.focusable = true;
+            row.tabIndex = 0;
+            foreach (var button in buttons) button.focusable = false;
+        }
+
+        /// <summary>Left/Right call adjust(-1/+1) and never move focus. Runs before the control's own handling.</summary>
+        protected static void OnArrows(VisualElement target, Action<int> adjust) {
+            target.RegisterCallback<NavigationMoveEvent>(e => {
+                int direction = e.direction == NavigationMoveEvent.Direction.Left ? -1
+                            : e.direction == NavigationMoveEvent.Direction.Right ? 1 : 0;
+                if (direction == 0) return;
+                adjust(direction);
+                SettingsNavigation.Consume(e);
+            }, TrickleDown.TrickleDown);
+        }
     }
 
     /// <summary>Lookup of all display types.</summary>

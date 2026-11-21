@@ -13,6 +13,7 @@ namespace Arosoul.PlayerSettings {
             if (slider == null) return;
 
             var valueLabel = root.Q<Label>("value"); // optional
+            OnArrows(slider, binding.Nudge);
             bool isInt = binding.Type == SettingType.Int;
 
             slider.lowValue = binding.Min;

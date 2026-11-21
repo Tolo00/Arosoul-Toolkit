@@ -29,7 +29,7 @@
 .settings-body { flex-grow: 1; flex-direction: column; min-height: 0; }
 .settings-pages { flex-grow: 1; min-height: 0; }
 .settings-page { flex-grow: 1; }
-.settings-entries { padding-right: 8px; }
+.settings-entries { }
 
 /* ---- Tabs ---- */
 .settings-tabs { flex-direction: row; margin-bottom: 12px; }
@@ -39,7 +39,8 @@
 .settings-tab {
     margin: 0 6px 0 0;
     padding: 8px 18px;
-    border-width: 0;
+    border-width: 2px; 
+    border-color: rgba(0, 0, 0, 0);
     border-radius: 6px;
     background-color: rgba(255, 255, 255, 0.06);
     color: rgb(190, 192, 200);
@@ -59,7 +60,6 @@
     margin-bottom: 2px;
     border-radius: 6px;
 }
-.setting-row:hover { background-color: rgba(255, 255, 255, 0.04); }
 
 .setting-label { width: 40%; color: rgb(225, 226, 232); font-size: 16px; }
 .setting-control { flex-grow: 1; flex-direction: row; align-items: center; }
@@ -70,7 +70,7 @@
 .setting-dropdown, .setting-text-field { flex-grow: 1; margin: 0; }
 
 .setting-step-button { width: 36px; height: 28px; margin: 0; border-width: 0; border-radius: 6px; background-color: rgba(255, 255, 255, 0.1); color: white; }
-.setting-step-button:hover { background-color: rgba(255, 255, 255, 0.2); }
+.setting-step-button:enabled:hover { background-color: rgba(255, 255, 255, 0.2); }
 .setting-step-button:disabled { opacity: 0.3; }
 
 /* ---- Footer ---- */
@@ -84,10 +84,10 @@
     background-color: rgba(255, 255, 255, 0.1);
     color: white;
 }
-.settings-button:hover { background-color: rgba(255, 255, 255, 0.2); }
+.settings-button:enabled:hover { background-color: rgba(255, 255, 255, 0.2); }
 .settings-button:disabled { opacity: 0.35; }
 .settings-button--apply { background-color: rgb(77, 124, 255); }
-.settings-button--apply:hover { background-color: rgb(97, 141, 255); }
+.settings-button--apply:enabled:hover { background-color: rgb(97, 141, 255); }
 
 /* ---- Unapplied changes prompt ---- */
 .settings-prompt-overlay {
@@ -111,3 +111,33 @@
 /* ---- Decorations ---- */
 .settings-header { font-size: 20px; -unity-font-style: bold; color: rgb(240, 240, 245); margin: 16px 8px 6px 8px; }
 .settings-separator { height: 1px; margin: 8px; background-color: rgba(255, 255, 255, 0.15); }
+
+/* ---- Keyboard / controller focus (only visible while .settings-nav-active is on the root) ---- */
+.settings-row { border-width: 2px; border-color: rgba(0, 0, 0, 0); }
+.settings-nav-active .settings-row--focused { border-color: rgb(120, 160, 255); background-color: rgba(77, 124, 255, 0.18); }
+.settings-nav-active .settings-tab:focus { border-color: white; }
+.settings-nav-active .settings-button:focus { border-color: white; background-color: rgba(255, 255, 255, 0.3); }
+.settings-nav-active .settings-button--apply:focus { background-color: rgb(97, 141, 255); }
+.settings-nav-active .setting-dropdown-button:focus { border-color: white; }
+
+/* ---- Dropdown ---- */
+.setting-dropdown-button {
+    flex-grow: 1; margin: 0; padding: 6px 12px;
+    border-width: 2px; border-color: rgba(0, 0, 0, 0); border-radius: 6px;
+    background-color: rgba(255, 255, 255, 0.1); color: white;
+    -unity-text-align: middle-left;
+}
+.setting-dropdown-button:hover { background-color: rgba(255, 255, 255, 0.2); }
+
+.settings-dropdown-overlay { position: absolute; left: 0; right: 0; top: 0; bottom: 0; }
+.settings-dropdown-list {
+    position: absolute; max-height: 260px; padding: 4px;
+    border-width: 1px; border-color: rgba(255, 255, 255, 0.15); border-radius: 6px;
+    background-color: rgb(52, 55, 65);
+}
+.settings-dropdown-item {
+    margin: 0; padding: 6px 10px; border-width: 0; border-radius: 4px;
+    background-color: rgba(0, 0, 0, 0); color: white; -unity-text-align: middle-left;
+}
+.settings-dropdown-item--selected { background-color: rgba(77, 124, 255, 0.35); }
+.settings-dropdown-item:focus { background-color: rgb(77, 124, 255); }

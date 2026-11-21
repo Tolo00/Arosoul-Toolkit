@@ -15,21 +15,15 @@ namespace Arosoul.PlayerSettings {
             var increase = Require<Button>(root, "increase");
             if (decrease == null || increase == null) return;
 
+            UseRowAsFocusTarget(root, decrease, increase);
+            OnArrows(RowOf(root), binding.Nudge);
+
             var valueLabel = root.Q<Label>("value");
             bool isInt = binding.Type == SettingType.Int;
             float step = binding.Step;
 
-            void Nudge(int direction) {
-                float v = binding.FloatValue + direction * step;
-                if (!isInt) v = binding.Min + Mathf.Round((v - binding.Min) / step) * step; // stay on the step grid, avoids float drift
-                v = Mathf.Clamp(v, binding.Min, binding.Max);
-
-                if (isInt) binding.SetValue(Mathf.RoundToInt(v));
-                else binding.SetValue(v);
-            }
-
-            decrease.clicked += () => Nudge(-1);
-            increase.clicked += () => Nudge(1);
+            decrease.clicked += () => binding.Nudge(-1);
+            increase.clicked += () => binding.Nudge(1);
 
             void Refresh() {
                 float v = binding.FloatValue;
