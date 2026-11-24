@@ -1,0 +1,23 @@
+{
+  "name": "com.arosoul.scenes",
+  "version": "2.0.0",
+  "displayName": "Arosoul Scenes",
+  "description": "Scene management with slots, scene dependencies, scene sets, readiness gating and transitions. Designed for Unity 6.6 with UI Toolkit.",
+  "unity": "6000.6",
+  "author": {
+    "name": "Tobias Löwdin",
+    "url": "https://tolo00.github.io/"
+  },
+  "license": "SEE LICENSE IN LICENSE.txt",
+  "keywords": [
+    "arosoul",
+    "unity",
+    "scenes",
+    "scene management",
+    "dependencies",
+    "additive scenes"
+  ],
+  "dependencies": {
+    "com.arosoul.transitions": "1.0.0"
+  }
+}

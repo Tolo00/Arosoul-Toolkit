@@ -1,0 +1,19 @@
+{
+  "name": "com.arosoul.transitions",
+  "version": "1.0.0",
+  "displayName": "Arosoul Transitions",
+  "description": "Extensible UI Toolkit transition system. Add new transitions by creating a ScriptableObject, reference them type-safely through generated ids.",
+  "unity": "6000.6",
+  "author": {
+    "name": "Tobias Löwdin",
+    "url": "https://tolo00.github.io/"
+  },
+  "license": "SEE LICENSE IN LICENSE.txt",
+  "keywords": [
+    "arosoul",
+    "unity",
+    "transitions",
+    "ui toolkit",
+    "scene transitions"
+  ]
+}

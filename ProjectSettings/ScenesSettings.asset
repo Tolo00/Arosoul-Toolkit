@@ -1,0 +1,40 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &1
+MonoBehaviour:
+  m_ObjectHideFlags: 53
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 741a95a62e98e446eade82012278526d, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Arosoul.Scenes.Editor::Arosoul.Scenes.Editor.ScenesSettings
+  _data:
+    _loadCoreScene: 1
+    _coreScene:
+      _guid: 67f0751a42a254e2691865f0dd3746b1
+      _path: Assets/Scenes/Core.unity
+      _name: Core
+    _initialSlot:
+      _value: 1
+    _nextSlotId: 2
+    _slots:
+    - _id: 1
+      _key: Main
+    _scenes:
+    - _scene:
+        _guid: 67f0751a42a254e2691865f0dd3746b1
+        _path: Assets/Scenes/Core.unity
+        _name: Core
+      _dependencies: []
+    - _scene:
+        _guid: 99c9720ab356a0642a771bea13969a05
+        _path: Assets/Scenes/SampleScene.unity
+        _name: SampleScene
+      _dependencies: []
+  _defaultsCreated: 1
+  _playModeBootstrap: 1
+  _syncBuildSettings: 1

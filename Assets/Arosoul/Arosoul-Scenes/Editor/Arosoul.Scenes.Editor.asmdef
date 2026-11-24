@@ -1,0 +1,20 @@
+{
+    "name": "Arosoul.Scenes.Editor",
+    "rootNamespace": "Arosoul.Scenes.Editor",
+    "references": [
+        "Arosoul.Scenes",
+        "Arosoul.Transitions",
+        "Arosoul.Transitions.Editor"
+    ],
+    "includePlatforms": [
+        "Editor"
+    ],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}

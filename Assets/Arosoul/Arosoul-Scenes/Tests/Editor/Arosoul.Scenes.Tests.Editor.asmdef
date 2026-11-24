@@ -1,0 +1,26 @@
+{
+    "name": "Arosoul.Scenes.Tests.Editor",
+    "rootNamespace": "Arosoul.Scenes.Tests",
+    "references": [
+        "UnityEngine.TestRunner",
+        "UnityEditor.TestRunner",
+        "Arosoul.Scenes",
+        "Arosoul.Scenes.Editor",
+        "Arosoul.Transitions"
+    ],
+    "includePlatforms": [
+        "Editor"
+    ],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": true,
+    "precompiledReferences": [
+        "nunit.framework.dll"
+    ],
+    "autoReferenced": false,
+    "defineConstraints": [
+        "UNITY_INCLUDE_TESTS"
+    ],
+    "versionDefines": [],
+    "noEngineReferences": false
+}
