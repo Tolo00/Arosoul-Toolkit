@@ -20,10 +20,12 @@ MonoBehaviour:
       _name: Core
     _initialSlot:
       _value: 1
-    _nextSlotId: 2
+    _nextSlotId: 3
     _slots:
     - _id: 1
       _key: Main
+    - _id: 2
+      _key: Extra
     _scenes:
     - _scene:
         _guid: 67f0751a42a254e2691865f0dd3746b1
@@ -35,6 +37,21 @@ MonoBehaviour:
         _path: Assets/Scenes/SampleScene.unity
         _name: SampleScene
       _dependencies: []
+    - _scene:
+        _guid: 6a3369f8179294e98907816331dafe4d
+        _path: Assets/Scenes/Scene_1.unity
+        _name: Scene_1
+      _dependencies: []
+    - _scene:
+        _guid: 0b7bcfedfd14246329e2d1d8e740da49
+        _path: Assets/Scenes/Scene_2.unity
+        _name: Scene_2
+      _dependencies: []
+    - _scene:
+        _guid: 06eac7dc28b964b69b061740abb9f151
+        _path: Assets/Scenes/Extra.unity
+        _name: Extra
+      _dependencies: []
   _paths:
   - Guid: 67f0751a42a254e2691865f0dd3746b1
     Path: Assets/Scenes/Core.unity
@@ -42,3 +59,12 @@ MonoBehaviour:
   - Guid: 99c9720ab356a0642a771bea13969a05
     Path: Assets/Scenes/SampleScene.unity
     Name: SampleScene
+  - Guid: 6a3369f8179294e98907816331dafe4d
+    Path: Assets/Scenes/Scene_1.unity
+    Name: Scene_1
+  - Guid: 0b7bcfedfd14246329e2d1d8e740da49
+    Path: Assets/Scenes/Scene_2.unity
+    Name: Scene_2
+  - Guid: 06eac7dc28b964b69b061740abb9f151
+    Path: Assets/Scenes/Extra.unity
+    Name: Extra
