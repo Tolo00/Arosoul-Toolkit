@@ -2,7 +2,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.InputSystem;
 
-namespace GameInputSystem {
+namespace Arosoul.GameInput {
 
     public enum RebindConflictMode {
         /// <summary>Two actions may share a control.</summary>

@@ -112,8 +112,9 @@ namespace Arosoul.Scenes.Editor
             var scenes = new IdClassSpec("SceneIds", nameof(SceneRef), "References to all registered scenes.");
             AddEntries(scenes, Collect(data.Scenes, s => s.Scene.Name, s => $"{nameof(SceneRef)}.{nameof(SceneRef.FromGuid)}(\"{s.Scene.Guid}\")"));
 
+            // Generated ids live in the global namespace, so game code can use them without a using directive.
             return IdCodeGenerator.Generate(
-                "Arosoul.Generated",
+                null,
                 new[] { "Arosoul.Scenes" },
                 new[] { slots, scenes },
                 "Arosoul Scenes");

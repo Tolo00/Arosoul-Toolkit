@@ -1,10 +1,10 @@
 using UnityEditor;
 using UnityEngine;
 
-namespace GameInputSystem.EditorTools {
+namespace Arosoul.GameInput.EditorTools {
 
     [CustomEditor(typeof(GameInputConfig))]
-    internal sealed class GameInputConfigEditor : Editor {
+    internal sealed class GameInputConfigEditor : UnityEditor.Editor {
         public override void OnInspectorGUI() {
             var config = (GameInputConfig)target;
 

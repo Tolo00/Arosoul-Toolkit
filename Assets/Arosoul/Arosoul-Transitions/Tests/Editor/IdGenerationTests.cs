@@ -88,6 +88,19 @@ namespace Arosoul.Transitions.Tests
         }
 
         [Test]
+        public void Generate_WithoutNamespace_PutsClassesInGlobalNamespace()
+        {
+            var spec = new IdClassSpec("TransitionIds", "TransitionId", "Ids.");
+            spec.Entries.Add(new IdEntry("Fade", "new TransitionId(1)"));
+
+            string code = IdCodeGenerator.Generate(null, new[] { "Arosoul.Transitions" }, new[] { spec }, "Test");
+
+            StringAssert.DoesNotContain("namespace", code);
+            StringAssert.Contains("\npublic static class TransitionIds\n{\n", code);
+            StringAssert.Contains("\n    public static readonly TransitionId Fade = new TransitionId(1);\n", code);
+        }
+
+        [Test]
         public void Generate_IsDeterministic()
         {
             var spec = new IdClassSpec("A", "T", "S");

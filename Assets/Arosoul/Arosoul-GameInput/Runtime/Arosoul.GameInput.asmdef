@@ -1,13 +1,10 @@
 {
-    "name": "GameInputSystem.Editor",
-    "rootNamespace": "GameInputSystem.EditorTools",
+    "name": "Arosoul.GameInput",
+    "rootNamespace": "Arosoul.GameInput",
     "references": [
-        "GameInputSystem",
         "Unity.InputSystem"
     ],
-    "includePlatforms": [
-        "Editor"
-    ],
+    "includePlatforms": [],
     "excludePlatforms": [],
     "allowUnsafeCode": false,
     "overrideReferences": false,

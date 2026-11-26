@@ -1,11 +1,14 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using GameInputSystem;
+using Arosoul.GameInput;
 using UnityEngine;
 using UnityEngine.UIElements;
 
 namespace Arosoul.PlayerSettings {
+
+    // Inside the Arosoul namespace "GameInput" resolves to the Arosoul.GameInput namespace, so name the class explicitly.
+    using GameInput = Arosoul.GameInput.GameInput;
 
     /// <summary>
     /// The keybinds of one action map, shown for either keyboard or gamepad. Rebinding is live (so it can be tested right away)

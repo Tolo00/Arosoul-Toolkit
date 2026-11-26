@@ -3,7 +3,7 @@ using UnityEngine;
 using UnityEngine.InputSystem;
 using UnityEngine.InputSystem.LowLevel;
 
-namespace GameInputSystem {
+namespace Arosoul.GameInput {
 
     /// <summary>Owns the runtime copy of the Input Actions asset and links it to the generated actions.</summary>
     public static class GameInputRuntime {

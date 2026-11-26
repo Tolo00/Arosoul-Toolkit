@@ -63,13 +63,32 @@ namespace Arosoul.Transitions.Editor
             Refresh();
         }
 
-        public static void Refresh()
+        /// <summary>
+        /// Assign missing ids and keys, then write the registry and the generated ids.
+        /// Deferred to a later editor update while playing, compiling or importing.
+        /// </summary>
+        /// <returns>True if the refresh ran now, false if it was deferred.</returns>
+        public static bool Refresh()
         {
-            if (_refreshing) return;
-            if (EditorApplication.isPlayingOrWillChangePlaymode || EditorApplication.isCompiling || EditorApplication.isUpdating)
+            return Refresh(EditorApplication.isCompiling);
+        }
+
+        /// <summary>
+        /// Refresh now, also while scripts are compiling. Used by explicit requests, such as <see cref="TransitionsAgentTools"/>,
+        /// that may follow a change that started a compilation. Still deferred while playing or importing.
+        /// </summary>
+        internal static bool RefreshIgnoringCompilation()
+        {
+            return Refresh(false);
+        }
+
+        private static bool Refresh(bool isCompiling)
+        {
+            if (_refreshing) return false;
+            if (EditorApplication.isPlayingOrWillChangePlaymode || isCompiling || EditorApplication.isUpdating)
             {
                 ScheduleRefresh();
-                return;
+                return false;
             }
 
             _refreshing = true;
@@ -86,6 +105,7 @@ namespace Arosoul.Transitions.Editor
             {
                 _refreshing = false;
             }
+            return true;
         }
 
         private static void AssignKeysAndIds(List<TransitionDefinition> definitions)
@@ -144,19 +164,35 @@ namespace Arosoul.Transitions.Editor
 
         private static void WriteIds(List<TransitionDefinition> definitions)
         {
+            GeneratedFileUtility.WriteIfChanged(IdsPath, BuildIdsSource(definitions));
+        }
+
+        /// <summary>
+        /// The source of the generated TransitionIds file for the given definitions.
+        /// </summary>
+        public static string BuildIdsSource(IReadOnlyList<TransitionDefinition> definitions)
+        {
             var names = IdentifierUtility.MakeUnique(definitions.Select(d => d.Key).ToList());
 
             var spec = new IdClassSpec("TransitionIds", nameof(TransitionId), "Type-safe ids of all transitions in the project.");
             for (int i = 0; i < definitions.Count; i++)
                 spec.Entries.Add(new IdEntry(names[i], $"new {nameof(TransitionId)}({definitions[i].Id.Value})"));
 
-            string source = IdCodeGenerator.Generate(
-                "Arosoul.Generated",
+            // Generated ids live in the global namespace, so game code can use them without a using directive.
+            return IdCodeGenerator.Generate(
+                null,
                 new[] { "Arosoul.Transitions" },
                 new[] { spec },
                 "Arosoul Transitions");
+        }
 
-            GeneratedFileUtility.WriteIfChanged(IdsPath, source);
+        /// <summary>
+        /// True if the generated file is missing or differs from what the current definitions would produce.
+        /// </summary>
+        public static bool IsIdsOutOfSync()
+        {
+            string expected = BuildIdsSource(FindDefinitions());
+            return !File.Exists(IdsPath) || File.ReadAllText(IdsPath) != expected;
         }
 
         // Creates the built-in transitions the first time the package is used in a project.
@@ -175,6 +211,9 @@ namespace Arosoul.Transitions.Editor
             AssetDatabase.SaveAssets();
         }
 
+        /// <summary>
+        /// Create a definition asset of the given type in the definitions folder. The id is assigned by the next refresh.
+        /// </summary>
         public static TransitionDefinition CreateDefinition(Type type, string name)
         {
             Directory.CreateDirectory(DefinitionsFolder);

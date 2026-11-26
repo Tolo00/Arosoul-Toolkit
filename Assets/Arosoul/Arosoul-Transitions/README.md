@@ -5,7 +5,6 @@ Extensible transition system built on UI Toolkit. Works on its own, and is used 
 ## Play a transition
 
 ```csharp
-using Arosoul.Generated;
 using Arosoul.Transitions;
 
 TransitionHandle handle = TransitionAPI.Play(TransitionIds.Fade);
@@ -18,7 +17,7 @@ held.Release();
 await held.WaitUntilFinishedAsync();
 ```
 
-`TransitionIds` is generated into `Assets/Generated/Transitions` whenever a transition asset is created, renamed or deleted.
+`TransitionIds` is generated (in the global namespace) into `Assets/Generated/Transitions` whenever a transition asset is created, renamed or deleted.
 The generated file has no assembly definition, so it compiles into Assembly-CSharp. If your game code lives in its own assembly definitions,
 add one in `Assets/Generated/Transitions` (referencing `Arosoul.Transitions`) and reference it from yours.
 `TransitionId` fields are also drawn as a dropdown in the inspector. Ids are stable integers stored in the asset,
@@ -36,6 +35,7 @@ public class WipeTransition : TransitionDefinition
 ```
 
 Create an asset of it (Tools > Transition System > Transitions > New Transition). The same window shows each transition's type and can delete the selected one. `TransitionIds.Wipe` appears after the next compile.
+From code, `Arosoul.Transitions.Editor.TransitionsAgentTools` can create, rename, delete, validate and describe transitions (see SKILLS.md).
 Override `PlayAsync` to drive the In/Out phases with your own animation library, and `OnProgress` to react to progress.
 
 ## Input blocking

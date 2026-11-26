@@ -20,12 +20,14 @@ MonoBehaviour:
       _name: Core
     _initialSlot:
       _value: 1
-    _nextSlotId: 3
+    _nextSlotId: 9
     _slots:
     - _id: 1
       _key: Main
     - _id: 2
       _key: Extra
+    - _id: 6
+      _key: NewSlot
     _scenes:
     - _scene:
         _guid: 67f0751a42a254e2691865f0dd3746b1

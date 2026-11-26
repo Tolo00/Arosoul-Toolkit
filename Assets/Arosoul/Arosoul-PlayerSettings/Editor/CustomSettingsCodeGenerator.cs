@@ -29,8 +29,21 @@ namespace Arosoul.PlayerSettings.EditorTools {
 
 #region Reading
 
-        /// <summary>Reads the settings back from the compiled generated class (empty if it doesn't exist yet).</summary>
+        // What was last written in this domain. The compiled class is stale until Unity recompiles, so this is the truth until then.
+        // Cleared by the domain reload that follows the compilation.
+        static List<CustomSettingData> lastWritten;
+        static string lastWrittenPath;
+
+        /// <summary>
+        /// Reads the settings back (empty if they don't exist yet). Uses what was last written if Unity has not recompiled since,
+        /// otherwise the compiled generated class.
+        /// </summary>
         public static List<CustomSettingData> LoadExisting(out string scriptPath) {
+            if (lastWritten != null && File.Exists(lastWrittenPath)) {
+                scriptPath = lastWrittenPath;
+                return lastWritten.Select(d => d.Clone()).ToList();
+            }
+
             scriptPath = FindScriptPath();
             var result = new List<CustomSettingData>();
 
@@ -111,6 +124,14 @@ namespace Arosoul.PlayerSettings.EditorTools {
 #endregion
 
 #region Generation
+
+        /// <summary>Writes the generated class to a file and imports it. Every writer must go through here so LoadExisting stays correct.</summary>
+        public static void Write(string path, IReadOnlyList<CustomSettingData> rows) {
+            File.WriteAllText(path, Generate(rows), new UTF8Encoding(false));
+            lastWritten = rows.Select(r => r.Clone()).ToList();
+            lastWrittenPath = path.Replace('\\', '/');
+            AssetDatabase.ImportAsset(path, ImportAssetOptions.ForceUpdate);
+        }
 
         public static string Generate(IReadOnlyList<CustomSettingData> rows) {
             var sb = new StringBuilder();

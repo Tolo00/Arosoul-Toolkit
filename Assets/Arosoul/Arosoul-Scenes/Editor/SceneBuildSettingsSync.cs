@@ -4,7 +4,8 @@ using UnityEditor;
 namespace Arosoul.Scenes.Editor
 {
     /// <summary>
-    /// Makes sure registered scenes are in the build settings. Existing entries and their order are kept.
+    /// Makes sure registered scenes are in the build settings. Existing entries and their order are kept,
+    /// except entries of scenes that no longer exist, which are removed.
     /// </summary>
     public static class SceneBuildSettingsSync
     {
@@ -12,7 +13,9 @@ namespace Arosoul.Scenes.Editor
         public static int Sync(IEnumerable<string> scenePaths)
         {
             var scenes = new List<EditorBuildSettingsScene>(EditorBuildSettings.scenes);
-            int changes = 0;
+
+            // Deleted scenes would otherwise stay in the list forever.
+            int changes = scenes.RemoveAll(s => AssetDatabase.LoadAssetAtPath<SceneAsset>(s.path) == null);
 
             foreach (string path in scenePaths)
             {

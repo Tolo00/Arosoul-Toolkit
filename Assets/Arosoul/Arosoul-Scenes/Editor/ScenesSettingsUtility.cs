@@ -27,6 +27,14 @@ namespace Arosoul.Scenes.Editor
         }
 
         /// <summary>
+        /// Raise <see cref="Changed"/> after the settings were changed outside of the Scene Config window.
+        /// </summary>
+        internal static void NotifyChanged()
+        {
+            Changed?.Invoke();
+        }
+
+        /// <summary>
         /// Add a scene to the registered scenes.
         /// </summary>
         public static void RegisterScene(string guid)

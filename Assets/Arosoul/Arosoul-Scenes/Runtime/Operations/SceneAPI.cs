@@ -17,14 +17,30 @@ namespace Arosoul.Scenes
         /// </summary>
         public static SceneOperation NewOperation() => new SceneOperation();
 
+        /// <summary>
+        /// Start an operation that loads a scene into a slot, see <see cref="SceneOperation.Load"/>.
+        /// </summary>
         public static SceneOperation Load(SlotId slot, SceneRef scene, bool setActive = false, bool reload = false)
         {
             return new SceneOperation().Load(slot, scene, setActive, reload);
         }
 
+        /// <summary>
+        /// Start an operation that empties a slot, see <see cref="SceneOperation.Unload"/>.
+        /// </summary>
         public static SceneOperation Unload(SlotId slot)
         {
             return new SceneOperation().Unload(slot);
+        }
+
+        /// <summary>
+        /// Replace the backend that loads and unloads Unity scenes, see <see cref="ISceneLoader"/>.
+        /// Call it before the first operation, for example from a RuntimeInitializeOnLoadMethod(BeforeSceneLoad) method.
+        /// </summary>
+        /// <returns>False if operations are queued or running, the loader is then not replaced.</returns>
+        public static bool SetLoader(ISceneLoader loader)
+        {
+            return SceneManager.Inst.SetLoader(loader);
         }
 
         /// <summary>

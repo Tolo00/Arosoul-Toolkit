@@ -20,12 +20,16 @@ namespace Arosoul.Scenes
         private readonly Dictionary<SlotId, string> _slots = new Dictionary<SlotId, string>();
         private readonly Queue<SceneOperation> _queue = new Queue<SceneOperation>();
 
+        // Scenes loaded outside of an operation (the startup scene). Initialized by the next operation, after their dependencies.
+        private readonly List<LoadedSceneInfo> _pendingInitialization = new List<LoadedSceneInfo>();
+
         private SceneCatalog _catalog;
         private ISceneLoader _loader;
         private SceneOperation _current;
         private bool _processing;
 
         public SceneCatalog Catalog => _catalog;
+        public ISceneLoader Loader => _loader;
         public bool IsBusy => _processing;
         public SceneOperation CurrentOperation => _current;
         public int QueuedCount => _queue.Count;
@@ -45,6 +49,25 @@ namespace Arosoul.Scenes
         }
 
         /// <summary>
+        /// Replace the backend that loads and unloads Unity scenes, for example to load scenes through Addressables.
+        /// Only possible while no operation is queued or running. Scenes that are already loaded stay tracked and are unloaded
+        /// through the new loader, so it must be able to unload scenes it did not load itself (such as the startup scene).
+        /// </summary>
+        /// <returns>True if the loader was replaced.</returns>
+        public bool SetLoader(ISceneLoader loader)
+        {
+            if (loader == null) throw new ArgumentNullException(nameof(loader));
+            if (_processing || _queue.Count > 0)
+            {
+                Debug.LogError("The scene loader can not be replaced while scene operations are queued or running.", this);
+                return false;
+            }
+
+            _loader = loader;
+            return true;
+        }
+
+        /// <summary>
         /// Replace the catalog and loader and forget all state. Used by tests.
         /// </summary>
         internal void Configure(SceneCatalog catalog, ISceneLoader loader)
@@ -55,6 +78,7 @@ namespace Arosoul.Scenes
             _loadedOrder.Clear();
             _slots.Clear();
             _queue.Clear();
+            _pendingInitialization.Clear();
             _current = null;
         }
 
@@ -171,6 +195,15 @@ namespace Arosoul.Scenes
                 SetPhase(op, SceneOperationPhase.Loading);
                 for (int i = 0; i < plan.ToLoad.Count; i++)
                     await LoadSceneAsync(plan.ToLoad[i], plan, i, plan.ToLoad.Count, op, transition, activeGuid);
+
+                // Now that their dependencies are loaded, initialize scenes that were loaded outside of an operation.
+                while (_pendingInitialization.Count > 0)
+                {
+                    LoadedSceneInfo pending = _pendingInitialization[0];
+                    _pendingInitialization.RemoveAt(0);
+                    if (_loaded.ContainsKey(pending.Guid))
+                        await InitializeSceneAsync(pending, op);
+                }
 
                 ApplySlots(plan);
 
@@ -364,18 +397,27 @@ namespace Arosoul.Scenes
 
         /// <summary>
         /// Registers the scene that was loaded by Unity when the game started in the initial slot, and loads its missing dependencies (including core).
+        /// The scene's initializers run after those dependencies are loaded.
         /// Used when the game starts without the play mode bootstrap, for example in builds.
         /// </summary>
-        internal async Awaitable AdoptInitialSceneAsync()
+        internal Awaitable AdoptInitialSceneAsync()
+        {
+            Scene active = UnityEngine.SceneManagement.SceneManager.GetActiveScene();
+            return AdoptSceneAsync(active, active.IsValid() ? active.path : null);
+        }
+
+        /// <summary>
+        /// Registers an already loaded scene in the initial slot, then runs an empty operation that loads its missing dependencies
+        /// and initializes it.
+        /// </summary>
+        internal async Awaitable AdoptSceneAsync(Scene scene, string path)
         {
             if (_catalog == null) return;
 
             SlotId initialSlot = _catalog.Data.InitialSlot;
-            Scene active = UnityEngine.SceneManagement.SceneManager.GetActiveScene();
-
-            if (!initialSlot.IsNone && active.IsValid() && _catalog.TryGetGuidByPath(active.path, out string guid) && !_loaded.ContainsKey(guid))
+            if (!initialSlot.IsNone && !string.IsNullOrEmpty(path) && _catalog.TryGetGuidByPath(path, out string guid) && !_loaded.ContainsKey(guid))
             {
-                var info = new LoadedSceneInfo(guid, _catalog.GetName(guid), active.path, active)
+                var info = new LoadedSceneInfo(guid, _catalog.GetName(guid), path, scene)
                 {
                     Slot = initialSlot,
                     IsCore = guid == _catalog.Graph.CoreGuid
@@ -383,6 +425,7 @@ namespace Arosoul.Scenes
                 _loaded[guid] = info;
                 _loadedOrder.Add(info);
                 _slots[initialSlot] = guid;
+                _pendingInitialization.Add(info);
                 SceneEvents.RaiseSceneLoaded(info);
             }
 

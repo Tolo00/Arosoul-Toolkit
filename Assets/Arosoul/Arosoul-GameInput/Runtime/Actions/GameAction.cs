@@ -1,7 +1,7 @@
 using System;
 using UnityEngine.InputSystem;
 
-namespace GameInputSystem {
+namespace Arosoul.GameInput {
 
     /// <summary>
     /// One action from the Input Actions asset. Instances are created by the generated GameActions class and

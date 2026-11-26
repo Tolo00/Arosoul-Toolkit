@@ -2,7 +2,6 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Text;
 using UnityEditor;
 using UnityEngine;
 using UnityEngine.UIElements;
@@ -259,8 +258,7 @@ namespace Arosoul.PlayerSettings.EditorTools {
             Directory.CreateDirectory(folder);
             if (existingPath != null && existingPath != path) AssetDatabase.DeleteAsset(existingPath); // moved, avoid a duplicate class
 
-            File.WriteAllText(path, CustomSettingsCodeGenerator.Generate(rows), new UTF8Encoding(false));
-            AssetDatabase.ImportAsset(path);
+            CustomSettingsCodeGenerator.Write(path, rows);
 
             existingPath = path;
             savedJson = ToJson(rows);

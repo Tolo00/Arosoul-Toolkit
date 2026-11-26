@@ -7,7 +7,8 @@ Guide for AI agents working with, extending, or writing code against `com.arosou
 - **Language/UI:** C#, UI Toolkit for editor tooling.
 - **Assemblies/namespaces:** runtime `Arosoul.Scenes`; editor `Arosoul.Scenes.Editor`.
 - **Dependency:** requires `com.arosoul.transitions` 1.0.0. Runtime scene operations use its `InputBlocker` and transition API. Do not duplicate those services.
-- **Generated API:** `Arosoul.Generated.SlotIds` and `Arosoul.Generated.SceneIds` (`using Arosoul.Generated;`).
+- **Generated API:** `SlotIds` and `SceneIds` in the **global namespace** (no `using` needed; `using Arosoul.Scenes;` is still needed for `SceneAPI`, `SlotId` and `SceneRef`).
+- **Editor automation:** `Arosoul.Scenes.Editor.ScenesAgentTools` configures everything the Scene Config window does from code (see section 3.1). Prefer it over driving the window.
 
 For transition definition authoring, priority, handle lifecycle, and `InputBlocker` details, also read the Transitions package's `SKILLS.md`. This file describes how Scenes uses those systems.
 
@@ -55,7 +56,11 @@ Editor menu items:
 
 **Never hand-edit `ProjectSettings/ScenesSettings.asset`, `Assets/Generated/Scenes/SceneCatalog.asset`, `SceneIds.cs`, or the generated bootstrap scene.** Use Scene Config and the provided menu/buttons; generated assets are maintained by the editor tooling.
 
-The runtime catalog is baked automatically when Scene Config commits settings and is added to Player Settings' preloaded assets. `SceneIds.cs` is a separate generated source file: rebuild it with the **Rebuild SceneIds** button in Scene Config when it is marked out of sync. The **Rebuild Catalog** menu command does not itself regenerate `SceneIds.cs`.
+The runtime catalog is baked automatically when Scene Config commits settings and is added to Player Settings' preloaded assets. `SceneIds.cs` is a separate generated source file:
+
+- Every `ScenesAgentTools` method that changes settings also regenerates `SceneIds.cs`. `ScenesAgentTools.Commit()` saves, bakes and regenerates in one call.
+- In the Scene Config window, rebuild it with the **Rebuild SceneIds** button when it is marked out of sync. The window does not regenerate it automatically (to avoid a recompile per edit), and the **Rebuild Catalog** menu command does not regenerate it either.
+- Regenerating `SceneIds.cs` triggers a script compilation. Code that references new `SlotIds`/`SceneIds` members compiles only after that.
 
 Generated source has no assembly definition and compiles into `Assembly-CSharp` by default. Code inside a project `.asmdef` cannot reference types compiled into `Assembly-CSharp`. If an `.asmdef` assembly needs `SlotIds` or `SceneIds`, add an appropriate `.asmdef` beside the generated source (referencing `Arosoul.Scenes`) and reference that generated assembly from the game assembly. Check existing parent/nested assembly definitions before adding one.
 
@@ -83,16 +88,50 @@ Registration and dependency rules:
 - Dependencies should also be registered when they have dependencies of their own. An unregistered dependency can still be loaded, but it is treated as a leaf and validation reports a warning.
 - The core scene is configured separately. It is injected as a dependency of every non-core scene, is never unloaded, and cannot have dependencies itself.
 - Dependency cycles, deleted scene references, self-dependencies, duplicate scene registrations, duplicate slot keys, and missing/invalid initial slots are validation errors.
-- If Sync Build Settings is enabled, referenced scenes are added to Build Settings and disabled existing entries are enabled. Existing build-settings order is preserved. With syncing disabled, the validator warns when a **registered scene** is missing from or disabled in Build Settings. It does not explicitly check the build-state inclusion of every core/dependency reference in that mode, so verify those paths manually for player builds.
+- If Sync Build Settings is enabled, referenced scenes are added to Build Settings, disabled existing entries are enabled, and entries of deleted scenes are removed. Existing build-settings order is preserved. With syncing disabled, the validator warns when a **registered scene** is missing from or disabled in Build Settings. It does not explicitly check the build-state inclusion of every core/dependency reference in that mode, so verify those paths manually for player builds.
 
 Changes in the Scene Config window are saved to Project Settings and the catalog is baked after a short debounce. Scene ids are rebuilt separately. The catalog bake is deferred while in Play Mode and performed after returning to Edit Mode.
+
+### 3.1 Editor automation API (`ScenesAgentTools`)
+
+`Arosoul.Scenes.Editor.ScenesAgentTools` is a public, editor-only static API for agents, editor scripts and `-executeMethod` wrappers. Scenes are identified by their project relative path (`Assets/Scenes/Level.unity`), slots by their key. Every method that changes settings records an undo step, saves `ProjectSettings/ScenesSettings.asset`, bakes the catalog (and syncs Build Settings if enabled) and regenerates `SceneIds.cs` before it returns. Invalid input throws `ArgumentException`/`InvalidOperationException` with an actionable message.
+
+```csharp
+using Arosoul.Scenes.Editor;
+
+ScenesAgentTools.SetCoreScene("Assets/Scenes/Core.unity");
+ScenesAgentTools.RegisterScene("Assets/Scenes/Managers.unity");
+ScenesAgentTools.RegisterScene("Assets/Scenes/Gameplay.unity", new[] { "Assets/Scenes/Managers.unity" });
+ScenesAgentTools.AddSlot("Ui");
+ScenesAgentTools.SetInitialSlot("Main");
+
+string[] diagnostics = ScenesAgentTools.Validate(); // fix every "ERROR:" entry, review "WARNING:" entries
+string summary = ScenesAgentTools.Describe();       // readable dump of the whole configuration
+```
+
+| Method | Use |
+|---|---|
+| `Data` | Read-only view of the current `ScenesData`. |
+| `RegisterScene(path, dependencyPaths = null)` | Register a scene; with `dependencyPaths` its dependency list is replaced. Already registered scenes only get their dependencies updated. Returns the `SceneRef`. |
+| `RegisterScenesInFolder(folder)` | Register every scene in a folder and its subfolders; returns the number added. |
+| `UnregisterScene(path)` | Remove a registered scene. Other scenes that depend on it keep the reference. |
+| `SetDependencies(path, dependencyPaths)` | Replace the ordered dependency list of a registered scene. Self-dependencies are rejected. |
+| `SetCoreScene(path)` | Enable and assign the core scene; `null` disables it. |
+| `AddSlot(key)` / `RenameSlot(key, newKey)` / `RemoveSlot(key)` | Manage slots. Keys must be unique. Renaming keeps the stored id. |
+| `SetInitialSlot(key)` / `GetSlot(key)` | Set the startup slot / look up a slot id by key (`SlotId.None` if missing). |
+| `SetOptions(playModeBootstrap, syncBuildSettings)` | Change the editor options; `null` keeps a value. |
+| `Commit()` | Save, bake and regenerate `SceneIds.cs`; returns diagnostics. Use after renaming/moving scene files. |
+| `Validate()` | `ERROR:`/`WARNING:` diagnostics, including a stale `SceneIds.cs` or missing catalog. Empty means valid. |
+| `Describe()` | Text summary: options, core, initial slot, slots and scenes with their generated member names and dependencies. |
+
+The window listens to these changes (`ScenesSettingsUtility.Changed`) and refreshes when open. For batch mode, put a parameterless `public static` wrapper in an editor assembly and call it with `-executeMethod`.
 
 ## 4. Loading and unloading scenes
 
 ```csharp
-using Arosoul.Generated;
 using Arosoul.Scenes;
 
+// SlotIds, SceneIds and TransitionIds are generated in the global namespace.
 await SceneAPI.Load(SlotIds.Main, SceneIds.Gameplay, setActive: true)
     .WithTransition(TransitionIds.LoadingScreen)
     .WithPayload(levelData)
@@ -194,7 +233,7 @@ Current implementation semantics:
 - Synchronous throws and asynchronous failures are collected. The manager still awaits the other initializers/groups, then fails the scene operation if any initializer failed.
 - A scene is registered in `LoadedScenes` and `SceneEvents.SceneLoaded` is raised **before** its initializers finish. Do not treat `SceneLoaded` as a readiness-complete event; observe the operation phase/state when readiness matters.
 - A scene already loaded and retained by the planner is not initialized again unless it is explicitly reloaded.
-- **Startup limitation:** the scene Unity starts with in a build is adopted into the initial slot; the current adoption path does not call `InitializeSceneAsync` for that already-loaded scene. Its dependencies loaded by the reconciliation operation do run their initializers. Use a minimal boot scene and load the first gameplay scene through `SceneAPI` if that scene itself requires `ISceneInitializer` gating.
+- **Startup scene:** the scene Unity starts with in a build (or in the editor without the bootstrap) is adopted into the initial slot. The reconciliation operation loads its missing dependencies, initializing each, and then runs the adopted scene's own initializers. The adopted scene's `Awake`/`OnEnable`/`Start` still ran before its dependencies were loaded, so keep dependency lookups in `InitializeAsync`, not `Awake`.
 
 `SceneContext` exposes `Guid`, `Name`, `Slot`, `Payload`, and `HasPayload`. `TryGetPayload<T>` reports whether the payload is of the requested type. `GetPayload<T>` returns `default` when the payload is missing or has a different type. The same operation payload is supplied to every scene loaded by that operation, including dependency-only scenes; their `Slot` is normally `SlotId.None`.
 
@@ -244,15 +283,15 @@ If the active scene is not registered, has no dependencies, or bootstrap is disa
 
 ### Build startup
 
-In a player build, Unity loads Build Settings scene 0 normally. Scenes adopts that active scene into the configured initial slot when the scene path is present in the catalog, then runs an empty reconciliation operation to load missing dependencies and the core scene. The already-loaded startup scene has already run its Unity `Awake` methods before those dependencies are loaded, so their relative `Awake` ordering is not deterministic.
+In a player build, Unity loads Build Settings scene 0 normally. Scenes adopts that active scene into the configured initial slot when the scene path is present in the catalog, then runs an empty reconciliation operation to load missing dependencies and the core scene, and finally runs the adopted scene's `ISceneInitializer`s. The already-loaded startup scene has already run its Unity `Awake` methods before those dependencies are loaded, so their relative `Awake` ordering is not deterministic.
 
-For deterministic startup ordering, make build index 0 a minimal boot scene and load the initial gameplay scene through `SceneAPI`. This also ensures the gameplay scene's `ISceneInitializer`s run as part of its operation.
+For deterministic startup ordering, make build index 0 a minimal boot scene and load the initial gameplay scene through `SceneAPI`.
 
 ### Build settings and validation
 
-- With **Sync Build Settings** enabled, catalog baking adds all known referenced scene paths (registered scenes, core, and dependencies) to Build Settings and enables existing disabled entries. Existing build-settings order is preserved.
+- With **Sync Build Settings** enabled, catalog baking adds all known referenced scene paths (registered scenes, core, and dependencies) to Build Settings, enables existing disabled entries and removes entries whose scene file no longer exists. The order of the remaining entries is preserved. Unreferenced but existing entries are never removed.
 - Validation runs when settings are committed and before builds. Configuration errors fail the build; warnings do not.
-- A stale `SceneIds.cs` is reported as a warning before build; the build hook does not regenerate the source file automatically. Rebuild it in Scene Config.
+- A stale `SceneIds.cs` is reported as a warning before build; the build hook does not regenerate the source file automatically. Rebuild it in Scene Config or call `ScenesAgentTools.Commit()`.
 - Catalog bake is deferred while playing and is performed after returning to Edit Mode.
 - If there is no runtime `SceneCatalog`, `SceneBootstrap` leaves the system dormant; no `SceneManager` is initialized by startup.
 
@@ -268,11 +307,20 @@ For deterministic startup ordering, make build index 0 a minimal boot scene and 
 - Editor commits must not create Undo entries. Keep the existing distinction: automated commits use `ApplyModifiedPropertiesWithoutUndo`; user changes use `ScenesUndo.Apply`.
 - `SceneRef` references survive scene moves/renames because the GUID is authoritative. Generated member names may change when the scene filename changes.
 
-### Loader abstraction: important current limitation
+### Custom loading backend
 
-`ISceneLoader` defines the backend contract (`LoadAdditiveAsync`, `UnloadAsync`, `SetActive`, `UnloadUnusedAssetsAsync`, `GetInitializers`). `UnitySceneLoader` is the runtime implementation and the Play Mode tests use `FakeSceneLoader`.
+`ISceneLoader` defines the backend contract (`LoadAdditiveAsync`, `UnloadAsync`, `SetActive`, `UnloadUnusedAssetsAsync`, `GetInitializers`). `UnitySceneLoader` is the default runtime implementation and the Play Mode tests use `FakeSceneLoader`.
 
-However, in this package version `SceneManager.OnSingletonEnable()` always creates `new UnitySceneLoader()`. The only method that replaces the loader, `SceneManager.Configure(...)`, is `internal` and exposed to the test assemblies through `InternalsVisibleTo`; there is no public runtime injection/property/factory. Therefore, implementing `ISceneLoader` alone does **not** let a game project switch to another backend. A production custom backend requires changing/extending the package API (for example, a public bootstrap/configuration hook) or maintaining a package fork. Do not tell users that a custom loader can simply be assigned through the current public API.
+Replace it with `SceneAPI.SetLoader(loader)` (or `SceneManager.Inst.SetLoader`), for example to load scenes through Addressables:
+
+```csharp
+[RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.BeforeSceneLoad)]
+private static void InstallLoader() => SceneAPI.SetLoader(new AddressablesSceneLoader());
+```
+
+- Replacing is only allowed while no operation is queued or running; otherwise it logs an error and returns `false`. Install the loader before the first operation (startup adoption runs at `AfterSceneLoad`, so `BeforeSceneLoad` is early enough).
+- Scenes that are already loaded stay tracked and are later unloaded through the new loader, so it must be able to unload scenes it did not load itself (the startup scene, the editor bootstrap scene).
+- The current loader is exposed as `SceneManager.Inst.Loader`.
 
 ## 10. Extending and testing
 
@@ -281,14 +329,15 @@ Extension points currently available:
 - **Scene graph logic:** `SceneGraph` resolves dependency order, injects the core dependency, and detects cycles. It contains no Unity scene-loading calls.
 - **Operation planning:** `ScenePlanner` computes final slots and load/unload sets without Unity scene APIs.
 - **Validation:** `ScenesValidator` validates settings against an `ISceneProjectContext`; its editor implementation queries the AssetDatabase and Build Settings.
-- **Loading backend:** `ISceneLoader` is an interface used by `SceneManager` and tests, but see the runtime injection limitation above.
+- **Loading backend:** implement `ISceneLoader` and install it with `SceneAPI.SetLoader` (see above).
+- **Editor automation:** `ScenesAgentTools` (section 3.1) wraps every configuration change; add new automation there rather than writing to `ScenesSettings` directly.
 
 Test coverage in the package:
 
 - `Tests/Editor`: dependency graph ordering, shared/core dependencies, cycle detection, planner slot/load/unload/reload behaviour, validation, `ScenesData` cloning/cache behaviour, and `SceneRef` identity.
-- `Tests/PlayMode`: core/dependency loading, keep rules, queue ordering/cancellation, failure handling, initializer ordering/concurrency/payload, input-block lifetime, events, unused-asset unloading, reload, and operation progress using `FakeSceneLoader`.
+- `Tests/PlayMode`: core/dependency loading, keep rules, queue ordering/cancellation, failure handling, initializer ordering/concurrency/payload, input-block lifetime, events, unused-asset unloading, reload, operation progress, startup-scene adoption and initialization, and loader replacement using `FakeSceneLoader`.
 
-Run both package test assemblies in Unity 6000.6 after changing runtime or editor behaviour. The source archive includes these tests, but this review did not execute Unity compilation, Play Mode, or build validation.
+Run both package test assemblies (`Arosoul.Scenes.Tests.Editor`, `Arosoul.Scenes.Tests.PlayMode`) after changing runtime or editor behaviour. Play Mode tests must be run asynchronously by automation bridges because entering Play Mode reloads the domain.
 
 ## 11. File map
 
@@ -302,6 +351,7 @@ Arosoul-Scenes/
     Operations/           SceneAPI, SceneOperation, SceneManager, SceneEvents, SceneEventLog,
                           SceneBootstrap, LoadedSceneInfo, SceneOperationEnums
   Editor/
+    ScenesAgentTools.cs   public editor automation API
     ScenesSettings.cs, ScenesSettingsUtility.cs, SceneCatalogBaker.cs,
     SceneBuildSettingsSync.cs, ScenesBuildHooks.cs, PlayModeBootstrap.cs, ScenesUndo.cs,
     Validation/           ScenesValidator, ValidationReport
@@ -318,7 +368,7 @@ Match the existing implementation when adding or modifying code:
 
 - Allman braces, 4-space indentation, and namespace matching the assembly (`Arosoul.Scenes` or `.Editor`).
 - Private fields use `_camelCase`; public types, methods, and properties use `PascalCase`.
-- Use `[SerializeField] private` for serialized private fields.
+- Use `[SerializeField] private` for serialized private fields, as the existing package code does.
 - Add `/// <summary>` XML documentation to public types and members; keep other comments short and explain non-obvious behaviour.
 - Keep runtime code free of `UnityEditor` references. Editor-only code belongs in `Editor/` and the editor assembly.
 - Preserve the assembly boundary and the dependency on Transitions; do not add a reverse dependency from Transitions to Scenes.

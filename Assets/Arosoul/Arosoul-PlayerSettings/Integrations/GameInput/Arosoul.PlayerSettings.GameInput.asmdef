@@ -3,7 +3,7 @@
     "rootNamespace": "Arosoul.PlayerSettings",
     "references": [
         "Arosoul.PlayerSettings",
-        "GameInputSystem",
+        "Arosoul.GameInput",
         "Unity.InputSystem"
     ],
     "includePlatforms": [],

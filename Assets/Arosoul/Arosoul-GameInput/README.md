@@ -1,4 +1,4 @@
-# Game Input
+# Arosoul GameInput
 
 A thin wrapper on the Unity Input System for singleplayer games.
 Edit actions in Unity's own **Input Actions editor** and `GameActions` is generated for you.
@@ -6,7 +6,7 @@ Edit actions in Unity's own **Input Actions editor** and `GameActions` is genera
 ## Setup
 1. `Tools > Game Input > Create Config` (creates `Assets/Resources/GameInputConfig.asset`).
 2. Assign your Input Actions asset to it. `GameActions.cs` is generated into `Assets/Generated` (changeable) and regenerated every time the asset is saved.
-3. Use it:
+3. Use it (`GameActions` is generated in the global namespace; add `using Arosoul.GameInput;` for `GameInput` and `GameInputBindings`):
    ```csharp
    var move = GameActions.Player.Move.Value;                 // Vector2Action
    if (GameActions.Player.Jump.WasPressedThisFrame) { }      // ButtonAction
@@ -38,3 +38,5 @@ Keyboard bindings can only become keyboard/mouse controls and gamepad bindings g
 more can be locked in the config. Saved to `input-bindings.json` per map. With *Swap* conflicts, taking a control that another action uses gives that action your old one.
 Cancel with Escape (keyboard) or Start (gamepad), configurable. The Player Settings integration builds the UI for this.
 
+## Automation
+`Arosoul.GameInput.EditorTools.GameInputAgentTools` creates and validates the config, adds actions and bindings, saves the Input Actions asset and generates `GameActions` from code. See SKILLS.md.

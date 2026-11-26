@@ -2,7 +2,7 @@ using System;
 using UnityEngine;
 using UnityEngine.InputSystem;
 
-namespace GameInputSystem {
+namespace Arosoul.GameInput {
 
     public sealed class Vector2Action : GameAction {
         bool startedThisFrame;

@@ -1,13 +1,18 @@
-# Skill: Arosoul Game Input (`GameInputSystem`)
+# Skill: Arosoul GameInput (`Arosoul.GameInput`)
 
 ## Purpose and boundaries
 
 A small single-player wrapper around the **Unity Input System**. The project keeps its real input definitions in a Unity `.inputactions` asset; this system generates a typed C# facade named `GameActions` and supplies device detection, mouse visibility, rumble, prompt labels, and binding remapping. It requires the Unity Input System package (`Unity.InputSystem` assembly).
 
-Namespace: `GameInputSystem`  
-Editor automation namespace: `GameInputSystem.EditorTools`  
-Runtime assembly: `GameInputSystem`  
-Editor assembly: `GameInputSystem.Editor`
+Namespace: `Arosoul.GameInput`  
+Editor automation namespace: `Arosoul.GameInput.EditorTools`  
+Runtime assembly: `Arosoul.GameInput`  
+Editor assembly: `Arosoul.GameInput.Editor`  
+Generated facade: `GameActions` in the **global namespace** (like `SceneIds` and `TransitionIds`); game code needs `using Arosoul.GameInput;` only for `GameInput`, `GameInputBindings` and the wrapper types.
+
+Earlier versions were named `GameInputSystem` (namespace and assemblies). To upgrade a project: replace `using GameInputSystem;` with `using Arosoul.GameInput;`, change asmdef references from `GameInputSystem` to `Arosoul.GameInput`, and in the old generated `GameActions.cs` replace `namespace GameInputSystem` with `namespace Arosoul.GameInput` by hand. The project must compile before the new generator is loaded; after that, `GenerateActions` rewrites the file in the global namespace.
+
+**Name collision:** the static class `GameInput` lives in the namespace `Arosoul.GameInput`. Code in the global namespace or in `Arosoul.GameInput` can write `GameInput.ActiveDevice`. Code inside any other `Arosoul.*` namespace resolves `GameInput` to the namespace instead; there, add `using GameInput = Arosoul.GameInput.GameInput;` **inside** the namespace block (as `Arosoul.PlayerSettings`' `ActionMapSection` does) or fully qualify the class.
 
 This is not a multiplayer/player-input ownership system. It assumes one local player and one active input context.
 
@@ -24,8 +29,8 @@ The runtime copy is important: rebinding changes the runtime copy and does not m
 ## Agent rules
 
 - **Do not edit `GameActions.cs`.** It is generated. Change the `.inputactions` asset, then regenerate.
-- Prefer the Unity Input Actions editor or `UnityEngine.InputSystem` asset APIs from an Editor script. Do not hand-edit the serialized `.inputactions` JSON.
-- Keep one `GameInputConfig` in the project. `Resources.Load` expects a unique config named exactly `GameInputConfig`. `ValidateConfig` warns if multiple configs are found, if excluded maps or locked action references do not exist, or if configured binding groups are missing.
+- Prefer `GameInputAgentTools.AddAction`/`AddBinding`/`AddVector2Composite`/`RemoveAction` + `SaveActions` (or the Unity Input Actions editor). Do not hand-edit the serialized `.inputactions` JSON.
+- Keep one `GameInputConfig` in the project. `Resources.Load` expects a unique config named exactly `GameInputConfig`. `ValidateConfig` warns if multiple configs are found, if excluded maps or locked action references do not exist, if configured binding groups are missing, or if a non-excluded action has an unsupported control type.
 - Keep the config at the root of a `Resources` folder, not in `Resources/SomeFolder/`.
 - Keep `Generated Folder` inside the project `Assets` directory. Do not point it at `Packages`, `Library`, or an absolute filesystem path.
 - Wait for Unity to finish compiling after generating `GameActions.cs` before writing game code that references newly generated members.
@@ -40,11 +45,11 @@ The runtime copy is important: rebinding changes the runtime copy and does not m
 
 ## Editor automation API
 
-The package includes public, Editor-only methods so an agent does not need to click menu items or drive custom inspectors. They are in `GameInputSystem.EditorTools.GameInputAgentTools` and compile into `GameInputSystem.Editor`.
+The package includes public, Editor-only methods so an agent does not need to click menu items, drive custom inspectors or edit `.inputactions` JSON. They are in `Arosoul.GameInput.EditorTools.GameInputAgentTools` and compile into `Arosoul.GameInput.Editor`.
 
 ```csharp
-using GameInputSystem;
-using GameInputSystem.EditorTools;
+using Arosoul.GameInput;
+using Arosoul.GameInput.EditorTools;
 using UnityEditor;
 using UnityEngine.InputSystem;
 
@@ -77,17 +82,34 @@ Available methods:
 | `ConfigureConfig(...)` | The required `actions` argument is always assigned (`null` clears it). Optional arguments cover the generated folder, excluded/locked maps/actions, device behavior, control-scheme names, cancel controls, conflict mode, auto-generation, and logging. Pass `null` for optional arguments to leave those fields unchanged; pass an empty list to clear exclusions or locks. |
 | `ValidateConfig(config = null)` | Return `ERROR:` and `WARNING:` diagnostics before generation. |
 | `GenerateActions(config = null)` | Validate, generate, import, and return the `GameActions.cs` asset path. |
+| `AddAction(asset, map, action, type = Button, expectedControlType = null)` | Add an action (creating the map if needed). `expectedControlType` selects the generated wrapper: `null`/`Button` → `ButtonAction`, `Vector2` → `Vector2Action`, `Axis` → `AnalogAction`. Throws if the action exists. |
+| `AddBinding(asset, "Map/Action", controlPath, groups = null)` | Add a binding such as `<Keyboard>/space`. Pass the config's keyboard or gamepad scheme name as `groups` so rebinding lists it under the right device. |
+| `AddVector2Composite(asset, "Map/Action", up, down, left, right, groups = null)` | Add a 2D Vector composite (for example WASD). |
+| `RemoveAction(asset, "Map/Action")` | Remove an action; returns `false` if it does not exist. |
+| `SaveActions(asset)` | Write the edited asset to its `.inputactions` file and reimport. Returns the reimported asset; use it afterwards. The edit methods above only change memory until this is called. |
+| `DescribeActions(config = null)` | Text summary: asset path, control schemes, maps (excluded marked), actions with their generated wrapper type and lock state, and bindings with groups. |
 | `CreateConfigFromCommandLine()` | No-argument entry point for Unity `-executeMethod`. |
 | `GenerateActionsFromCommandLine()` | No-argument generation entry point for Unity `-executeMethod` after the config is assigned. |
 
 Example batch-mode calls:
 
 ```text
--executeMethod GameInputSystem.EditorTools.GameInputAgentTools.CreateConfigFromCommandLine
--executeMethod GameInputSystem.EditorTools.GameInputAgentTools.GenerateActionsFromCommandLine
+-executeMethod Arosoul.GameInput.EditorTools.GameInputAgentTools.CreateConfigFromCommandLine
+-executeMethod Arosoul.GameInput.EditorTools.GameInputAgentTools.GenerateActionsFromCommandLine
 ```
 
-To add or edit actions programmatically, load the `InputActionAsset` in an Editor script, use the Unity Input System APIs (`InputActionAsset`, `InputActionMap`, `InputAction`, bindings and composites), save/import the asset, then call `ConfigureConfig` and `GenerateActions`. Keep action map and action names stable because generated accessors are based on them. Add binding groups that match the config's keyboard/gamepad control scheme names if you want reliable per-device binding lists; without binding groups, the package falls back to classifying bindings by their control paths. When an asset is saved/imported, the package's postprocessor also queues generation if `Auto Generate` is enabled. Explicit generation is preferable in deterministic automation.
+To add or edit actions programmatically:
+
+```csharp
+var actions = GameInputAgentTools.FindConfig().Actions;
+GameInputAgentTools.AddAction(actions, "Player", "Dash");
+GameInputAgentTools.AddBinding(actions, "Player/Dash", "<Keyboard>/leftShift", "Keyboard&Mouse");
+GameInputAgentTools.AddBinding(actions, "Player/Dash", "<Gamepad>/buttonEast", "Gamepad");
+actions = GameInputAgentTools.SaveActions(actions);
+GameInputAgentTools.GenerateActions(); // then wait for compilation before using GameActions.Player.Dash
+```
+
+For anything the helpers do not cover (interactions, processors, other composites), use the Unity Input System setup APIs (`InputActionSetupExtensions`) on the same asset and finish with `SaveActions`. Keep action map and action names stable because generated accessors are based on them. Add binding groups that match the config's keyboard/gamepad control scheme names if you want reliable per-device binding lists; without binding groups, the package falls back to classifying bindings by their control paths. When an asset is saved/imported, the package's postprocessor also queues generation if `Auto Generate` is enabled. Explicit generation is preferable in deterministic automation.
 
 Unity menu equivalents:
 
@@ -101,7 +123,7 @@ All entry points are static. Do not search for or create a `GameInput` singleton
 ### Reading actions
 
 ```csharp
-using GameInputSystem;
+using Arosoul.GameInput; // GameInput, wrapper types. GameActions itself is global.
 
 Vector2 move = GameActions.Player.Move.Value;
 float look = GameActions.Player.Look.Value;
@@ -210,10 +232,10 @@ The `Arosoul.PlayerSettings` package contains a ready-made rebinding section. Us
 
 ### Add a player action
 
-1. Edit the configured `.inputactions` asset and add the action to the intended map.
+1. Add the action to the intended map: `GameInputAgentTools.AddAction` (or the Input Actions editor).
 2. Set its expected control type deliberately (`Button`, `Vector2`, or `Axis`/`Analog`).
-3. Add bindings and composites in the Input Actions editor.
-4. Save the asset and regenerate `GameActions.cs` (or use `GameInputAgentTools.GenerateActions`).
+3. Add bindings and composites with `AddBinding`/`AddVector2Composite`, using the config's control scheme names as groups.
+4. `SaveActions`, then `GenerateActions`.
 5. Wait for compilation, then use `GameActions.<Map>.<Action>`.
 
 ### Suppress gameplay controls while a menu is open
@@ -247,5 +269,9 @@ Before handing off, call `ValidateConfig`, generate the facade, confirm Unity co
 - `Runtime/Actions/`: action wrapper types and priority dispatch.
 - `Runtime/Bindings/`: remapping, binding labels, gamepad glyphs.
 - `Editor/GameActionsGenerator.cs`: typed facade generation and asset postprocessor.
-- `Editor/GameInputAgentTools.cs`: public Editor automation API.
+- `Editor/GameInputAgentTools.cs`: public Editor automation API (config, validation, generation, action editing, description).
 - `Editor/GameInputSetup.cs`: menu setup and `GAMEINPUT_INSTALLED` scripting define.
+
+## Code conventions
+
+This package uses its own established style; match it when editing these files: K&R braces (`namespace X {`, `void M() {`), private fields without underscore (`static bool queued;`), implicit `private`, and `#region` blocks at column 0. Keep runtime code free of `UnityEditor`. Public types and members get `/// <summary>` docs.

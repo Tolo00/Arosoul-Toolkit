@@ -4,7 +4,7 @@ using System.IO;
 using UnityEngine;
 using UnityEngine.InputSystem;
 
-namespace GameInputSystem {
+namespace Arosoul.GameInput {
 
     /// <summary>
     /// Remapping API. Build your own rebind UI through this API.

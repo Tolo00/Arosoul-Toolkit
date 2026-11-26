@@ -11,7 +11,7 @@ MonoBehaviour:
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: b8cdb0b1d303e4e3587392de5f9adef9, type: 3}
   m_Name: GameInputConfig
-  m_EditorClassIdentifier: GameInputSystem::GameInputSystem.GameInputConfig
+  m_EditorClassIdentifier: Arosoul.GameInput::Arosoul.GameInput.GameInputConfig
   actions: {fileID: -944628639613478452, guid: 052faaac586de48259a63d0c4782560b, type: 3}
   excludedMaps:
   - UI

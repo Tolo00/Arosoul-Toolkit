@@ -1,5 +1,5 @@
 using Arosoul.PlayerSettings;
-using GameInputSystem;
+using Arosoul.GameInput;
 using UnityEngine;
 
 public class TestingScript : MonoBehaviour

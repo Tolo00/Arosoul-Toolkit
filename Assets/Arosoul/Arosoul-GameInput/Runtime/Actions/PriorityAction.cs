@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.InputSystem;
 
-namespace GameInputSystem {
+namespace Arosoul.GameInput {
 
     /// <summary>
     /// Only the listener(s) with the highest priority get the callback.

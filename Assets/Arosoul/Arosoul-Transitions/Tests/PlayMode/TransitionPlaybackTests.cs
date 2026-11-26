@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using NUnit.Framework;
 using UnityEngine;
 using UnityEngine.TestTools;
+using UnityEngine.UIElements;
 
 namespace Arosoul.Transitions.Tests
 {
@@ -110,6 +111,18 @@ namespace Arosoul.Transitions.Tests
             second.Cancel();
             yield return null;
             Assert.IsFalse(InputBlocker.IsBlocked);
+        }
+
+        [UnityTest]
+        public IEnumerator Overlay_CreatedWhileInputIsBlocked_BlocksPointerInput()
+        {
+            using (InputBlocker.Acquire("Test"))
+            {
+                TransitionManager.Initialize();
+                yield return null;
+                Assert.AreEqual(PickingMode.Position, TransitionManager.Inst.OverlayRoot.pickingMode);
+            }
+            Assert.AreEqual(PickingMode.Ignore, TransitionManager.Inst.OverlayRoot.pickingMode);
         }
     }
 }

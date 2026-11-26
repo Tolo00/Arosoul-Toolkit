@@ -314,5 +314,44 @@ namespace Arosoul.Scenes.Tests
             Assert.AreEqual(1f, op.Progress, 0.0001f);
             Assert.AreEqual(SceneOperationPhase.Done, op.Phase);
         }
+
+        [UnityTest]
+        public IEnumerator AdoptedScene_IsInitializedAfterItsDependencies()
+        {
+            var log = new List<string>();
+            _loader.Initializers[Path("Gameplay")] = new List<ISceneInitializer> { new TestInitializer { Name = "gameplay", Log = log } };
+            _loader.Initializers[Path("Managers")] = new List<ISceneInitializer> { new TestInitializer { Name = "managers", Log = log } };
+
+            Awaitable adopt = _manager.AdoptSceneAsync(default, Path("Gameplay"));
+            float end = Time.realtimeSinceStartup + 5f;
+            while (!adopt.IsCompleted && Time.realtimeSinceStartup < end)
+                yield return null;
+
+            Assert.IsTrue(adopt.IsCompleted, "Adopting the scene did not finish in time.");
+            CollectionAssert.AreEqual(new[] { "load:" + Path("Core"), "load:" + Path("Managers") }, _loader.Log);
+            CollectionAssert.AreEqual(new[] { "init-start:managers", "init-end:managers", "init-start:gameplay", "init-end:gameplay" }, log);
+            Assert.IsTrue(SceneAPI.TryGetSceneInSlot(_main, out LoadedSceneInfo info));
+            Assert.AreEqual("Gameplay", info.Guid);
+        }
+
+        [UnityTest]
+        public IEnumerator SetLoader_IsRejectedWhileBusy_AndReplacesLoaderWhenIdle()
+        {
+            var operation = SceneAPI.Load(_main, Scene("Gameplay"));
+            operation.Perform();
+
+            var other = new FakeSceneLoader();
+            LogAssert.Expect(LogType.Error, new Regex("can not be replaced"));
+            Assert.IsFalse(SceneAPI.SetLoader(other));
+            Assert.AreSame(_loader, _manager.Loader);
+
+            float end = Time.realtimeSinceStartup + 5f;
+            while (!operation.IsFinished && Time.realtimeSinceStartup < end)
+                yield return null;
+
+            Assert.IsTrue(SceneAPI.SetLoader(other));
+            yield return Run(SceneAPI.Unload(_main));
+            CollectionAssert.Contains(other.Log, "unload:" + Path("Gameplay"));
+        }
     }
 }

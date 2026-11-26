@@ -1,5 +1,5 @@
 using System.Collections.Generic;
-using GameInputSystem;
+using Arosoul.GameInput;
 
 namespace Arosoul.PlayerSettings {
 

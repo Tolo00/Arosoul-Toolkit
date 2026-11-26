@@ -1,6 +1,6 @@
 using UnityEngine.InputSystem;
 
-namespace GameInputSystem {
+namespace Arosoul.GameInput {
 
     /// <summary>One remappable binding (a single control assigned to an action), as listed by GameInputBindings.GetEntries.</summary>
     public sealed class RebindEntry {

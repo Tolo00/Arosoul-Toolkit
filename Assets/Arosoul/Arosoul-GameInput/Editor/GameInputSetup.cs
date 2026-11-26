@@ -2,7 +2,7 @@ using System.Linq;
 using UnityEditor;
 using UnityEditor.Build;
 
-namespace GameInputSystem.EditorTools {
+namespace Arosoul.GameInput.EditorTools {
 
     [InitializeOnLoad]
     internal static class GameInputSetup {

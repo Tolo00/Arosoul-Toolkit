@@ -2,11 +2,12 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Text;
 using UnityEditor;
 using UnityEngine;
 using UnityEngine.InputSystem;
 
-namespace GameInputSystem.EditorTools {
+namespace Arosoul.GameInput.EditorTools {
 
     /// <summary>
     /// Public Editor APIs for deterministic setup and code generation. These methods can be called from an
@@ -203,7 +204,8 @@ namespace GameInputSystem.EditorTools {
             }
 
             foreach (var map in config.Actions.actionMaps) {
-                if (map == null) continue;
+                // Excluded maps are not generated, so their control types don't matter.
+                if (map == null || config.IsExcludedMap(map.name)) continue;
                 foreach (var action in map.actions) {
                     string expected = action.expectedControlType ?? string.Empty;
                     if (action.name.EndsWith("Priority", StringComparison.Ordinal) && action.name.Length > "Priority".Length) continue;
@@ -232,6 +234,128 @@ namespace GameInputSystem.EditorTools {
             AssetDatabase.Refresh();
             return path;
         }
+
+#region Editing actions
+
+        /// <summary>
+        /// Adds an action, creating its map if needed. Changes are in memory until <see cref="SaveActions"/> is called.
+        /// expectedControlType decides the generated wrapper: null/"Button" => ButtonAction, "Vector2" => Vector2Action,
+        /// "Axis" => AnalogAction. Names ending in "Priority" always become a PriorityAction.
+        /// </summary>
+        public static InputAction AddAction(
+            InputActionAsset asset,
+            string mapName,
+            string actionName,
+            InputActionType type = InputActionType.Button,
+            string expectedControlType = null) {
+
+            if (asset == null) throw new ArgumentNullException(nameof(asset));
+            if (string.IsNullOrWhiteSpace(mapName)) throw new ArgumentException("Map name cannot be empty.", nameof(mapName));
+            if (string.IsNullOrWhiteSpace(actionName)) throw new ArgumentException("Action name cannot be empty.", nameof(actionName));
+            if (mapName.Contains('/') || actionName.Contains('/')) throw new ArgumentException("Map and action names cannot contain '/'.");
+
+            var map = asset.FindActionMap(mapName, false) ?? asset.AddActionMap(mapName);
+            if (map.FindAction(actionName, false) != null) throw new InvalidOperationException($"Action '{mapName}/{actionName}' already exists.");
+
+            if (type == InputActionType.Button && string.IsNullOrEmpty(expectedControlType)) expectedControlType = "Button";
+            return map.AddAction(actionName, type, expectedControlLayout: expectedControlType);
+        }
+
+        /// <summary>
+        /// Adds a binding to an action. actionPath is "Map/Action", controlPath an Input System path such as "&lt;Keyboard&gt;/space".
+        /// groups is the control scheme (binding group) name, for example the config's keyboard or gamepad scheme, so the binding is
+        /// listed under the right device for rebinding. Changes are in memory until <see cref="SaveActions"/> is called.
+        /// </summary>
+        public static void AddBinding(InputActionAsset asset, string actionPath, string controlPath, string groups = null) {
+            if (string.IsNullOrWhiteSpace(controlPath)) throw new ArgumentException("Control path cannot be empty.", nameof(controlPath));
+            RequireAction(asset, actionPath).AddBinding(controlPath, groups: groups);
+        }
+
+        /// <summary>
+        /// Adds a 2D Vector composite (up/down/left/right parts) to an action, for example WASD movement.
+        /// Changes are in memory until <see cref="SaveActions"/> is called.
+        /// </summary>
+        public static void AddVector2Composite(
+            InputActionAsset asset,
+            string actionPath,
+            string up,
+            string down,
+            string left,
+            string right,
+            string groups = null) {
+
+            RequireAction(asset, actionPath)
+                .AddCompositeBinding("2DVector")
+                .With("Up", up, groups)
+                .With("Down", down, groups)
+                .With("Left", left, groups)
+                .With("Right", right, groups);
+        }
+
+        /// <summary>Removes an action ("Map/Action"). Returns false if it does not exist. In memory until <see cref="SaveActions"/>.</summary>
+        public static bool RemoveAction(InputActionAsset asset, string actionPath) {
+            if (asset == null) throw new ArgumentNullException(nameof(asset));
+            var action = asset.FindAction(actionPath, false);
+            if (action == null) return false;
+            action.RemoveAction();
+            return true;
+        }
+
+        /// <summary>
+        /// Writes an edited InputActionAsset back to its .inputactions file and reimports it. If the asset is assigned to the
+        /// config and Auto Generate is on, GameActions.cs is regenerated on import; call <see cref="GenerateActions"/> to do it explicitly.
+        /// Returns the reimported asset; use it instead of the passed instance afterwards.
+        /// </summary>
+        public static InputActionAsset SaveActions(InputActionAsset asset) {
+            if (asset == null) throw new ArgumentNullException(nameof(asset));
+            string path = AssetDatabase.GetAssetPath(asset);
+            if (string.IsNullOrEmpty(path) || !path.EndsWith(".inputactions", StringComparison.OrdinalIgnoreCase)) {
+                throw new ArgumentException("The asset must be loaded from an .inputactions file in the project.", nameof(asset));
+            }
+
+            File.WriteAllText(path, asset.ToJson());
+            AssetDatabase.ImportAsset(path, ImportAssetOptions.ForceUpdate);
+            return AssetDatabase.LoadAssetAtPath<InputActionAsset>(path);
+        }
+
+        /// <summary>
+        /// Readable summary of the config's actions: maps (excluded ones marked), actions with their generated wrapper type, and bindings.
+        /// </summary>
+        public static string DescribeActions(GameInputConfig config = null) {
+            config ??= FindConfig();
+            if (config == null) return "No GameInputConfig found. Create one with GameInputAgentTools.CreateConfig().";
+            if (config.Actions == null) return "GameInputConfig has no InputActionAsset assigned.";
+
+            var sb = new StringBuilder();
+            sb.Append("Actions asset: ").Append(AssetDatabase.GetAssetPath(config.Actions)).Append('\n');
+            sb.Append("Control schemes: ").Append(string.Join(", ", config.Actions.controlSchemes.Select(s => s.name))).Append('\n');
+            foreach (var map in config.Actions.actionMaps) {
+                bool excluded = config.IsExcludedMap(map.name);
+                sb.Append("Map '").Append(map.name).Append('\'').Append(excluded ? " (excluded, not generated)" : "").Append('\n');
+                foreach (var action in map.actions) {
+                    string wrapper = excluded ? "-" : GameActionsGenerator.WrapperTypeFor(action) ?? "unsupported";
+                    sb.Append($"  - {action.name} type={action.type} control={action.expectedControlType} wrapper={wrapper}");
+                    if (config.IsLocked(map.name, action.name)) sb.Append(" locked");
+                    sb.Append('\n');
+                    foreach (var binding in action.bindings) {
+                        sb.Append("      ").Append(binding.isPartOfComposite ? "  " + binding.name + ": " : "")
+                          .Append(binding.isComposite ? "composite " + binding.path : binding.path);
+                        if (!string.IsNullOrEmpty(binding.groups)) sb.Append(" [").Append(binding.groups).Append(']');
+                        sb.Append('\n');
+                    }
+                }
+            }
+            return sb.ToString();
+        }
+
+        static InputAction RequireAction(InputActionAsset asset, string actionPath) {
+            if (asset == null) throw new ArgumentNullException(nameof(asset));
+            var action = asset.FindAction(actionPath, false);
+            if (action == null) throw new ArgumentException($"Action '{actionPath}' not found. Use the format Map/Action.", nameof(actionPath));
+            return action;
+        }
+
+#endregion
 
         /// <summary>Convenient no-argument entry point for Unity -executeMethod.</summary>
         public static void CreateConfigFromCommandLine() => CreateConfig();

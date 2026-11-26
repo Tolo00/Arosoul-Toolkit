@@ -18,6 +18,8 @@ namespace Arosoul.Transitions
 
         public TransitionHandle ActiveHandle => _active;
 
+        internal VisualElement OverlayRoot => _root;
+
         public static event Action<TransitionHandle> TransitionStarted;
         public static event Action<TransitionHandle> TransitionFinished;
 
@@ -68,8 +70,9 @@ namespace Arosoul.Transitions
             _document.panelSettings = panelSettings;
             overlay.SetActive(true);
 
+            // Match the current state, a block may already be held before the overlay exists (e.g. by a scene operation).
             _root = _document.rootVisualElement;
-            _root.pickingMode = PickingMode.Ignore;
+            _root.pickingMode = InputBlocker.IsBlocked ? PickingMode.Position : PickingMode.Ignore;
             _root.style.position = Position.Absolute;
             _root.style.left = 0;
             _root.style.top = 0;

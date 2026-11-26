@@ -5,7 +5,7 @@ using UnityEngine.InputSystem.DualShock;
 using UnityEngine.InputSystem.Switch;
 using UnityEngine.InputSystem.XInput;
 
-namespace GameInputSystem {
+namespace Arosoul.GameInput {
 
     /// <summary>
     /// Device state and utilities. Actions are accessed through the generated GameActions class, remapping through GameInputBindings.

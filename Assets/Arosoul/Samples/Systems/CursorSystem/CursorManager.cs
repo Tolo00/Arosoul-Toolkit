@@ -1,7 +1,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using Arosoul.Essentials;
-using GameInputSystem;
+using Arosoul.GameInput;
 using UnityEngine;
 using UnityEngine.InputSystem;
 using UnityEngine.UI;

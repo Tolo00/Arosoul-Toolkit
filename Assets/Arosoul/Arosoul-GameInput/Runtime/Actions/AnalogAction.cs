@@ -1,7 +1,7 @@
 using System;
 using UnityEngine.InputSystem;
 
-namespace GameInputSystem {
+namespace Arosoul.GameInput {
 
     public sealed class AnalogAction : GameAction {
         bool startedThisFrame;

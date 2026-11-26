@@ -15,12 +15,13 @@ Settings are stored in `ProjectSettings/ScenesSettings.asset` and baked into `As
 The generated files have no assembly definition, so they compile into Assembly-CSharp. If your game code lives in its own assembly definitions,
 add an assembly definition in `Assets/Generated/Scenes` (referencing `Arosoul.Scenes`) and reference it from yours.
 
-The catalog is baked automatically. SceneIds.cs (SlotIds and SceneIds) is generated with the Rebuild SceneIds button in the top right of Scene Config. It is highlighted when the file is out of date.
+The catalog is baked automatically. SceneIds.cs (SlotIds and SceneIds, in the global namespace) is generated with the Rebuild SceneIds button in the top right of Scene Config. It is highlighted when the file is out of date.
+
+Everything in Scene Config can also be done from code with `Arosoul.Scenes.Editor.ScenesAgentTools` (register scenes, dependencies, slots, core scene, validate, describe). It regenerates SceneIds.cs automatically. See SKILLS.md.
 
 ## Use
 
 ```csharp
-using Arosoul.Generated;
 using Arosoul.Scenes;
 
 await SceneAPI.Load(SlotIds.Main, SceneIds.Gameplay, setActive: true)
@@ -66,7 +67,7 @@ With *Play Mode Bootstrap* enabled, pressing play in a registered scene with dep
 At startup the runtime loads the scene you were editing through Scenes, so core and dependencies load first, in order.
 A start scene you set yourself is never replaced.
 
-In builds the scene Unity starts with is adopted into the initial slot and its missing dependencies load after it.
+In builds the scene Unity starts with is adopted into the initial slot and its missing dependencies load after it, then its initializers run.
 For deterministic Awake order in builds, make build index 0 a minimal boot scene and load everything else through Scenes.
 
 ## Tools
@@ -78,4 +79,4 @@ For deterministic Awake order in builds, make build index 0 a minimal boot scene
 ## Tests
 
 Edit mode: graph, planner, validator and data. Play mode: the scene manager against a fake `ISceneLoader`.
-Replace `ISceneLoader` to load scenes from another source.
+Implement `ISceneLoader` and install it with `SceneAPI.SetLoader` to load scenes from another source.

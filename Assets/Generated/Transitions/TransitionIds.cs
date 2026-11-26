@@ -5,13 +5,10 @@
 
 using Arosoul.Transitions;
 
-namespace Arosoul.Generated
+/// <summary>Type-safe ids of all transitions in the project.</summary>
+public static class TransitionIds
 {
-    /// <summary>Type-safe ids of all transitions in the project.</summary>
-    public static class TransitionIds
-    {
-        public static readonly TransitionId Fade = new TransitionId(4);
-        public static readonly TransitionId LoadingScreen = new TransitionId(2);
-        public static readonly TransitionId Slide = new TransitionId(3);
-    }
+    public static readonly TransitionId Fade = new TransitionId(4);
+    public static readonly TransitionId LoadingScreen = new TransitionId(2);
+    public static readonly TransitionId Slide = new TransitionId(3);
 }

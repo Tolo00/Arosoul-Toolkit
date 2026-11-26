@@ -68,11 +68,37 @@ namespace Arosoul.PlayerSettings.EditorTools {
                 }
             }
 
-            File.WriteAllText(path, CustomSettingsCodeGenerator.Generate(copy), new UTF8Encoding(false));
-            AssetDatabase.ImportAsset(path, ImportAssetOptions.ForceUpdate);
+            CustomSettingsCodeGenerator.Write(path, copy);
             AssetDatabase.SaveAssets();
             return path;
         }
+
+        /// <summary>
+        /// Adds a custom setting, or replaces the one with the same apiName, keeping every other setting and the script location.
+        /// Safe to call several times before Unity recompiles. Returns the generated script path.
+        /// </summary>
+        public static string AddOrUpdateCustomSetting(CustomSettingData row) {
+            if (row == null) throw new ArgumentNullException(nameof(row));
+            var rows = LoadCustomSettings(out string scriptPath);
+            int index = rows.FindIndex(r => r.apiName == row.apiName);
+            if (index >= 0) rows[index] = row.Clone();
+            else rows.Add(row.Clone());
+            return GenerateCustomSettings(rows, FolderOf(scriptPath));
+        }
+
+        /// <summary>
+        /// Removes a custom setting by apiName. Its saved player value is no longer used. Returns false if it does not exist.
+        /// Remove its layout entries too (ValidateLayout reports them as unknown ids after compilation).
+        /// </summary>
+        public static bool RemoveCustomSetting(string apiName) {
+            var rows = LoadCustomSettings(out string scriptPath);
+            if (rows.RemoveAll(r => r.apiName == apiName) == 0) return false;
+            GenerateCustomSettings(rows, FolderOf(scriptPath));
+            return true;
+        }
+
+        static string FolderOf(string scriptPath) =>
+            string.IsNullOrEmpty(scriptPath) ? CustomSettingsCodeGenerator.DefaultFolder : Path.GetDirectoryName(scriptPath).Replace('\\', '/');
 
         /// <summary>Returns all registered setting, section, and decoration ids for layout authoring.</summary>
         public static string[] GetAvailableItemIds() {
@@ -134,6 +160,40 @@ namespace Arosoul.PlayerSettings.EditorTools {
             SettingsTheme theme = null) {
             if (layout == null) throw new ArgumentNullException(nameof(layout));
             SetLayoutProperties(layout, title, tabOrientation, showCloseButton, theme, true);
+        }
+
+        /// <summary>Returns the index of the first category with the given name, or -1. Use it to get the categoryIndex other methods take.</summary>
+        public static int FindCategoryIndex(SettingsLayout layout, string name) {
+            if (layout == null) throw new ArgumentNullException(nameof(layout));
+            return layout.Categories == null ? -1 : layout.Categories.FindIndex(c => c != null && c.name == name);
+        }
+
+        /// <summary>Readable summary of a layout: properties, then each category with its index, mode and indexed entries.</summary>
+        public static string DescribeLayout(SettingsLayout layout) {
+            if (layout == null) throw new ArgumentNullException(nameof(layout));
+            var sb = new StringBuilder();
+            sb.Append($"Layout '{layout.Title}' path={AssetDatabase.GetAssetPath(layout)} tabs={layout.TabOrientation} close={layout.ShowCloseButton} theme={(layout.Theme != null ? layout.Theme.name : "default")}\n");
+            if (layout.Categories == null) return sb.ToString();
+
+            for (int c = 0; c < layout.Categories.Count; c++) {
+                var category = layout.Categories[c];
+                if (category == null) { sb.Append($"[{c}] (null)\n"); continue; }
+                sb.Append($"[{c}] '{category.name}' mode={category.applyMode} reset={category.showResetButton}\n");
+                if (category.entries == null) continue;
+                for (int e = 0; e < category.entries.Count; e++) {
+                    var entry = category.entries[e];
+                    if (entry == null) { sb.Append($"    [{e}] (null)\n"); continue; }
+                    sb.Append($"    [{e}] {entry.settingId}");
+                    if (!string.IsNullOrEmpty(entry.displayType)) sb.Append(" display=").Append(entry.displayType);
+                    if (entry.parameters != null) {
+                        foreach (var parameter in entry.parameters) {
+                            if (parameter != null) sb.Append($" {parameter.key}={parameter.value}");
+                        }
+                    }
+                    sb.Append('\n');
+                }
+            }
+            return sb.ToString();
         }
 
         /// <summary>Adds a category and returns it so callers can add entries or adjust its fields.</summary>
@@ -329,6 +389,7 @@ namespace Arosoul.PlayerSettings.EditorTools {
                         diagnostics.Add($"ERROR: {location} has no item id.");
                         continue;
                     }
+                    location += $" ('{entry.settingId}')";
 
                     if (SettingsRegistry.TryGet(entry.settingId, out var definition)) {
                         if (!definition.IsAvailable) diagnostics.Add($"WARNING: '{entry.settingId}' is unavailable on the current platform and will not be shown.");

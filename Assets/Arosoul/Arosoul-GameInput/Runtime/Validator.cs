@@ -1,6 +1,6 @@
 using UnityEngine;
 
-namespace GameInputSystem {
+namespace Arosoul.GameInput {
 
     internal static class Validator {
         public static bool Verbose;

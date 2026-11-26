@@ -12,7 +12,7 @@ Runtime namespace and assembly: `Arosoul.PlayerSettings` / `Arosoul.PlayerSettin
 Editor automation namespace: `Arosoul.PlayerSettings.EditorTools`  
 Editor assembly: `Arosoul.PlayerSettings.Editor`
 
-The core system does not depend on the `GameInputSystem` package. The optional Game Input integration lives under `Integrations/GameInput`. The supplied core asmdef explicitly references `Unity.InputSystem`; ensure that package is installed in projects using this package. URP brightness is a separate optional integration.
+The core system does not depend on the Arosoul GameInput package (`Arosoul.GameInput`). The optional Game Input integration lives under `Integrations/GameInput`. The supplied core asmdef explicitly references `Unity.InputSystem`; ensure that package is installed in projects using this package. URP brightness is a separate optional integration.
 
 The package can be imported as folders under `Assets/`; a UPM manifest is not required. Preserve the `Runtime`, `Editor`, `Integrations`, `Resources`, and `.asmdef` structure.
 
@@ -94,14 +94,21 @@ var rows = new[] {
 
 string[] errors = PlayerSettingsAgentTools.ValidateCustomSettings(rows);
 // Fix all returned validation errors before proceeding.
-string scriptPath = PlayerSettingsAgentTools.GenerateCustomSettings(rows);
+string scriptPath = PlayerSettingsAgentTools.GenerateCustomSettings(rows); // replaces the whole list
+
+// To add or change a single setting without touching the others:
+PlayerSettingsAgentTools.AddOrUpdateCustomSetting(new CustomSettingData {
+    apiName = "ShowHints", displayName = "Show Hints", type = SettingType.Bool, defaultValue = "true"
+});
 ```
 
 Available methods:
 
 | Method | Use |
 |---|---|
-| `LoadCustomSettings(out scriptPath)` | Read the currently compiled generated settings back as editable row data. |
+| `LoadCustomSettings(out scriptPath)` | Read the current custom settings back as editable row data. Returns what was last written if Unity has not recompiled since, otherwise the compiled generated class. |
+| `AddOrUpdateCustomSetting(row)` | Add one setting, or replace the one with the same `apiName`, keeping all others and the script location. Validates and regenerates. Safe to call repeatedly before Unity recompiles. |
+| `RemoveCustomSetting(apiName)` | Remove one setting and regenerate; returns `false` if it does not exist. Remove its layout entries as well. |
 | `ValidateCustomSettings(rows)` | Validate ids, generated enum names, types, defaults, ranges, and collisions with built-in ids. |
 | `GenerateCustomSettings(rows, outputFolder = "Assets/Settings")` | Generate/import `CustomSettings.cs`; returns its asset path. Output folder must be inside `Assets`. |
 | `GetAvailableItemIds()` | List registered setting, section, and decoration ids for layout authoring. |
@@ -109,12 +116,14 @@ Available methods:
 | `CreateLayout(path, title, orientation, showCloseButton, theme)` | Create a `SettingsLayout` asset. The path must be under `Assets` and end in `.asset`. |
 | `ConfigureLayout(layout, title, orientation, showCloseButton, theme)` | Update the layout's top-level properties. |
 | `AddCategory(layout, name, applyMode, showResetButton)` | Add and return a category. |
+| `FindCategoryIndex(layout, name)` | Index of the first category with that name, or `-1`. Use it to get the `categoryIndex` the other methods take. |
+| `DescribeLayout(layout)` | Text summary of the layout: properties, then each `[index]` category with mode/reset and its `[index]` entries, display ids and parameters. |
 | `ConfigureCategory(layout, categoryIndex, name, applyMode, showResetButton)` | Update a category by its current ordered index. |
 | `MoveCategory(layout, fromIndex, toIndex)` / `RemoveCategory(layout, categoryIndex)` | Reorder or remove categories. Indices are current zero-based list positions. |
 | `AddEntry(layout, categoryIndex, itemId, displayType, parameters)` | Add a setting, section, or decoration. Repeated entries are allowed. If `displayType` is omitted, the first/default supported display is selected. |
 | `ConfigureEntry(layout, categoryIndex, entryIndex, itemId, displayType, parameters)` | Replace an existing entry after validating its id, display and decoration parameters. |
 | `MoveEntry(layout, categoryIndex, fromIndex, toIndex)` / `RemoveEntry(layout, categoryIndex, entryIndex)` | Reorder or remove entries. Indices are current zero-based list positions. |
-| `ValidateLayout(layout)` | Check ids, display compatibility, platform availability, and decoration parameters. |
+| `ValidateLayout(layout)` | Check ids, display compatibility, platform availability, and decoration parameters. Each diagnostic starts with `ERROR:` or `WARNING:` and names the category, entry index and item id. |
 
 **Important sequencing:** after `GenerateCustomSettings`, Unity must compile the new C# file before the new setting can be discovered by `SettingsRegistry` and added to a layout. Run layout authoring after compilation/domain reload, then call `SettingsRegistry.Rebuild()` or `PlayerSettingsAgentTools.ValidateLayout(layout)` to refresh and verify the catalog.
 
@@ -122,8 +131,8 @@ Example layout authoring after custom settings have compiled:
 
 ```csharp
 var layout = PlayerSettingsAgentTools.CreateLayout("Assets/Settings/MainSettings.asset", "Settings");
-var graphics = PlayerSettingsAgentTools.AddCategory(layout, "Graphics", ApplyMode.Manual);
-var graphicsIndex = layout.Categories.IndexOf(graphics);
+PlayerSettingsAgentTools.AddCategory(layout, "Graphics", ApplyMode.Manual);
+int graphicsIndex = PlayerSettingsAgentTools.FindCategoryIndex(layout, "Graphics");
 PlayerSettingsAgentTools.AddEntry(layout, graphicsIndex, "resolution");
 PlayerSettingsAgentTools.AddEntry(layout, graphicsIndex, "quality_level");
 PlayerSettingsAgentTools.AddEntry(layout, graphicsIndex, "vsync");
@@ -269,7 +278,7 @@ Create a public, concrete `LayoutDecoration` subclass with a public parameterles
 
 ### Game Input (`Integrations/GameInput`)
 
-The `Arosoul.PlayerSettings.GameInput` assembly is compiled when `GAMEINPUT_INSTALLED` is defined. The Game Input package adds this define from its Editor setup. The integration discovers one section per non-excluded Input Action map and exposes these section ids:
+The `Arosoul.PlayerSettings.GameInput` assembly references `Arosoul.GameInput` and is compiled when `GAMEINPUT_INSTALLED` is defined. Its code lives in the `Arosoul.PlayerSettings` namespace, where `GameInput` would resolve to the `Arosoul.GameInput` namespace; `ActionMapSection.cs` therefore declares `using GameInput = Arosoul.GameInput.GameInput;` inside its namespace block. Do the same in any new integration code. The Game Input package adds this define from its Editor setup. The integration discovers one section per non-excluded Input Action map and exposes these section ids:
 
 - `input:<MapName>` with display id `keyboard` (`Keyboard Keybinds`).
 - `input:<MapName>` with display id `gamepad` (`Gamepad Keybinds`).
@@ -300,6 +309,8 @@ The `Arosoul.PlayerSettings.URP` assembly is enabled by the `com.unity.render-pi
 - **Game Input keybind section missing**: verify the Game Input package, `GAMEINPUT_INSTALLED` define, `GameInputConfig` in Resources, and the action-map entry id/display id.
 - **URP brightness missing**: verify URP is installed and the integration asmdef's version define is active.
 
+Run the `Arosoul.PlayerSettings.Tests.Editor` test assembly (custom setting validation and layout authoring) after changing the editor tooling.
+
 Before handoff, run `PlayerSettingsAgentTools.ValidateCustomSettings` (if generating custom settings), wait for compilation, run `ValidateLayout`, and verify in Play Mode that Apply/Undo/Reset and the intended navigation work.
 
 ## Source map
@@ -314,4 +325,9 @@ Before handoff, run `PlayerSettingsAgentTools.ValidateCustomSettings` (if genera
 - `Editor/PlayerSettingsAgentTools.cs`: public Editor automation API for agents and scripts.
 - `Integrations/GameInput/`: input rebinding section.
 - `Integrations/URP/`: URP brightness setting.
+- `Tests/Editor/`: editor tests for custom setting validation and the layout automation API.
 - `link.xml`: linker preservation for reflection-discovered types.
+
+## Code conventions
+
+This package uses its own established style; match it when editing these files: K&R braces (`namespace X {`, `void M() {`), private fields without underscore, implicit `private`, `#region` blocks at column 0, and `/// <summary>` on public members. Keep runtime code free of `UnityEditor`. Every writer of `CustomSettings.cs` must go through `CustomSettingsCodeGenerator.Write` so `LoadCustomSettings` stays correct before recompilation.

@@ -27,13 +27,13 @@ MonoBehaviour:
       - key: text
         value: Cool Strings
     - settingId: StringTest
-      displayType: text
+      displayType: slider
       parameters: []
     - settingId: StringTest
-      displayType: text
+      displayType: slider
       parameters: []
     - settingId: StringTest
-      displayType: text
+      displayType: slider
       parameters: []
     - settingId: decoration:header
       displayType: 

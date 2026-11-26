@@ -5,22 +5,20 @@
 
 using Arosoul.Scenes;
 
-namespace Arosoul.Generated
+/// <summary>Type-safe ids of all scene slots.</summary>
+public static class SlotIds
 {
-    /// <summary>Type-safe ids of all scene slots.</summary>
-    public static class SlotIds
-    {
-        public static readonly SlotId Main = new SlotId(1);
-        public static readonly SlotId Extra = new SlotId(2);
-    }
+    public static readonly SlotId Main = new SlotId(1);
+    public static readonly SlotId Extra = new SlotId(2);
+    public static readonly SlotId NewSlot = new SlotId(6);
+}
 
-    /// <summary>References to all registered scenes.</summary>
-    public static class SceneIds
-    {
-        public static readonly SceneRef Core = SceneRef.FromGuid("67f0751a42a254e2691865f0dd3746b1");
-        public static readonly SceneRef SampleScene = SceneRef.FromGuid("99c9720ab356a0642a771bea13969a05");
-        public static readonly SceneRef Scene_1 = SceneRef.FromGuid("6a3369f8179294e98907816331dafe4d");
-        public static readonly SceneRef Scene_2 = SceneRef.FromGuid("0b7bcfedfd14246329e2d1d8e740da49");
-        public static readonly SceneRef Extra = SceneRef.FromGuid("06eac7dc28b964b69b061740abb9f151");
-    }
+/// <summary>References to all registered scenes.</summary>
+public static class SceneIds
+{
+    public static readonly SceneRef Core = SceneRef.FromGuid("67f0751a42a254e2691865f0dd3746b1");
+    public static readonly SceneRef SampleScene = SceneRef.FromGuid("99c9720ab356a0642a771bea13969a05");
+    public static readonly SceneRef Scene_1 = SceneRef.FromGuid("6a3369f8179294e98907816331dafe4d");
+    public static readonly SceneRef Scene_2 = SceneRef.FromGuid("0b7bcfedfd14246329e2d1d8e740da49");
+    public static readonly SceneRef Extra = SceneRef.FromGuid("06eac7dc28b964b69b061740abb9f151");
 }

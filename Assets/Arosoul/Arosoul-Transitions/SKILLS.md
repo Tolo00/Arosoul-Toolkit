@@ -6,7 +6,8 @@ Guide for AI agents working with, extending, or writing code against `com.arosou
 - **Unity version:** 6000.6 (Unity 6.6)
 - **Language/UI:** C#, UI Toolkit for the runtime overlay and editor tooling. Do not introduce uGUI into this package.
 - **Assemblies/namespaces:** runtime `Arosoul.Transitions`; editor `Arosoul.Transitions.Editor`.
-- **Generated API:** `Arosoul.Generated.TransitionIds` (`using Arosoul.Generated;`).
+- **Generated API:** `TransitionIds` in the **global namespace** (no `using` needed; `using Arosoul.Transitions;` is still needed for `TransitionAPI`, `TransitionId` and the other runtime types).
+- **Editor automation:** `Arosoul.Transitions.Editor.TransitionsAgentTools` creates, inspects, validates and regenerates transitions from code (see section 6.1).
 - **Dependency direction:** this package works independently. `com.arosoul.scenes` depends on it; Transitions must not depend on Scenes.
 
 ---
@@ -59,7 +60,6 @@ The editor creates the built-in Fade, Slide, and Loading Screen assets on first 
 ## 3. Playing and controlling transitions
 
 ```csharp
-using Arosoul.Generated;
 using Arosoul.Transitions;
 
 TransitionHandle handle = TransitionAPI.Play(TransitionIds.Fade);
@@ -130,7 +130,7 @@ Important semantics:
 
 1. Create a non-abstract class derived from `TransitionDefinition`.
 2. Implement `Build()` and `Apply(...)`.
-3. Create an asset through **Tools > Transition System > Transitions > New Transition** or `[CreateAssetMenu]`.
+3. Create an asset through **Tools > Transition System > Transitions > New Transition**, `[CreateAssetMenu]`, or `TransitionsAgentTools.CreateDefinition<T>(assetName, key)` (after the new type has compiled).
 4. Let the editor assign the id and generate `TransitionIds.<Key>`; do not assign `_id` manually.
 
 ```csharp
@@ -200,8 +200,7 @@ InputBlocker.BlockedChanged += OnBlockedChanged;
 - `GetReasons()` returns the reasons for currently active tokens.
 - Subscriptions and active tokens are cleared at `RuntimeInitializeOnLoadMethod(SubsystemRegistration)`. Subscribe in `OnEnable` and unsubscribe in `OnDisable`; do not assume static subscriptions survive entering Play Mode.
 - A transition acquires its own token only when its definition's `BlockInput` setting is enabled.
-- The overlay catches UI Toolkit pointer input only through the `TransitionManager` root's picking mode. `InputBlocker.Acquire` alone does not create the overlay or intercept events.
-- **Current synchronization caveat:** `CreateOverlay()` subscribes to `BlockedChanged` but does not initialize the root's picking mode from the current `InputBlocker.IsBlocked` value. If `TransitionManager` is first created while a block is already held, the root can remain in `PickingMode.Ignore` until the overall blocked state changes. This can occur on the first scene operation that acquires its default input block before starting its first transition. A code fix should initialize the root from `InputBlocker.IsBlocked` when the overlay is created; until then, do not rely on pointer interception in this sequence.
+- The overlay catches UI Toolkit pointer input only through the `TransitionManager` root's picking mode. `InputBlocker.Acquire` alone does not create the overlay or intercept events. Once the overlay exists it follows `BlockedChanged`, and when it is created it starts from the current `InputBlocker.IsBlocked` state, so a block acquired before the first transition (for example by a scene operation) is honoured.
 - It does not disable keyboard/gamepad navigation or gameplay actions. The project's input layer must subscribe to `BlockedChanged` or check `IsBlocked` and disable the relevant actions itself.
 - Scenes operations can independently acquire an `InputBlocker` token. Their `WithInputBlocking(false)` setting does not override a transition definition's own `BlockInput` setting.
 
@@ -226,6 +225,32 @@ Id/key rules:
 
 `TransitionRegistry` lookup uses the generated registry. In the Editor it can locate the asset through `AssetDatabase`; in a player it finds the registry loaded as a preloaded asset. If a custom `PanelSettings` is assigned to the registry, that asset is used by the overlay. Otherwise the manager creates default panel settings in code (1920×1080 reference resolution, scale-to-screen, default sorting order 32000); assign custom panel settings if project theme, scaling, or sorting needs to differ.
 
+### 6.1 Editor automation API (`TransitionsAgentTools`)
+
+`Arosoul.Transitions.Editor.TransitionsAgentTools` is a public, editor-only static API for agents, editor scripts and `-executeMethod` wrappers. Every method that changes assets refreshes ids, the registry and `TransitionIds.cs` before it returns (also while scripts are compiling; it throws `InvalidOperationException` only while playing or importing).
+
+```csharp
+using Arosoul.Transitions;
+using Arosoul.Transitions.Editor;
+
+FadeTransition fade = TransitionsAgentTools.CreateDefinition<FadeTransition>("QuickFade", key: "QuickFade");
+string[] diagnostics = TransitionsAgentTools.Validate(); // fix every "ERROR:" entry, review "WARNING:" entries
+string summary = TransitionsAgentTools.Describe();       // key, id, type, default times, asset path per transition
+```
+
+| Method | Use |
+|---|---|
+| `GetDefinitionTypeNames()` | Full names of every creatable (non-abstract) `TransitionDefinition` type. |
+| `FindDefinitions()` / `FindDefinition(key)` | All definitions ordered by asset path / one by key (`null` if missing). |
+| `CreateDefinition<T>(assetName, key = null)` | Create a definition asset in `Assets/Generated/Transitions/Definitions` and assign its id. Overloads take a `Type` or a type name. The asset name is made unique if taken. |
+| `SetKey(definition, key)` | Change the key (the generated member name). The id is kept. |
+| `DeleteDefinition(definition)` | Delete the asset and refresh. Serialized references to its id stop resolving. |
+| `Regenerate()` | Assign ids, write the registry, regenerate `TransitionIds.cs`; returns its path. |
+| `Validate()` | `ERROR:`/`WARNING:` diagnostics: missing/duplicate ids, member-name collisions, missing or stale registry, registry not preloaded, stale `TransitionIds.cs`. Empty means valid. |
+| `Describe()` | Text summary of every definition. |
+
+To change definition settings (times, curve, colours), edit the asset with `SerializedObject` in an editor script and save it; the generated ids are unaffected. Newly generated `TransitionIds` members are usable after the next script compilation.
+
 ## 7. Rules for agents and gotchas
 
 - Use `TransitionId` and generated `TransitionIds` constants or serialized inspector fields. Never identify a transition by string, asset-list index, or a manually copied integer.
@@ -245,14 +270,15 @@ Good extension points:
 - Custom transition visuals/behaviour: derive from `TransitionDefinition`.
 - Custom overlay panel configuration: assign `PanelSettings` on `TransitionRegistry`.
 - Shared lazy MonoBehaviour service: `LazyLoaded<T>` is available, but use it only when a persistent, on-demand component is appropriate.
-- Pure generation logic: `IdentifierUtility`, `StableIdAllocator`, and `IdCodeGenerator` are separated from Unity runtime code and have Editor tests.
+- Pure generation logic: `IdentifierUtility`, `StableIdAllocator`, and `IdCodeGenerator` are separated from Unity runtime code and have Editor tests. `IdCodeGenerator.Generate` takes a `null` namespace to emit global-namespace classes (used by Transitions and Scenes).
+- Editor automation: add new scripted operations to `TransitionsAgentTools` so agents keep a single entry point.
 
 Test coverage in the package:
 
 - `Tests/Editor`: stable id allocation/generation, `TransitionId`, `TransitionParameters`, reference-counted `InputBlocker`, and built-in transition visuals/progress.
-- `Tests/PlayMode`: transition phase progression, input block lifetime, Hold-until-released, priority rejection, and priority interruption.
+- `Tests/PlayMode`: transition phase progression, input block lifetime, Hold-until-released, priority rejection, priority interruption, and overlay pointer blocking when the overlay is created while input is already blocked.
 
-Run both package test assemblies in Unity 6000.6 after changing runtime or editor behaviour. The source archive includes these tests, but this review did not execute Unity compilation, Play Mode, or build validation.
+Run both package test assemblies (`Arosoul.Transitions.Tests.Editor`, `Arosoul.Transitions.Tests.PlayMode`) after changing runtime or editor behaviour. Play Mode tests must be run asynchronously by automation bridges because entering Play Mode reloads the domain.
 
 ## 9. File map
 
@@ -265,6 +291,7 @@ Arosoul-Transitions/
     Shared/               LazyLoaded<T>
   Editor/
     TransitionRegistryBuilder.cs
+    TransitionsAgentTools.cs  public editor automation API
     TransitionsWindow.cs
     TransitionDefinitionEditor.cs
     Drawers/              TransitionIdDrawer, IdDropdownDrawer
@@ -280,7 +307,7 @@ Match the existing code when adding or modifying code:
 
 - Allman braces, 4-space indentation, and namespace matching the assembly (`Arosoul.Transitions` or `.Editor`).
 - Private fields use `_camelCase`; public types, methods, and properties use `PascalCase`.
-- Use `[SerializeField] private` for serialized private fields.
+- Use `[SerializeField] private` for serialized private fields, as the existing package code does.
 - Add `/// <summary>` XML documentation to public types and members; keep other comments short and explain non-obvious behaviour.
 - Keep runtime code free of `UnityEditor` references. Editor-only code belongs in `Editor/` and the editor assembly.
 - Preserve the runtime/editor assembly boundary and the dependency direction between packages.

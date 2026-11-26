@@ -1,7 +1,7 @@
 using System.Collections.Generic;
 using UnityEngine.InputSystem;
 
-namespace GameInputSystem {
+namespace Arosoul.GameInput {
 
     /// <summary>Brand specific names for gamepad controls, so prompts say "Cross" on a DualSense and "A" on an Xbox pad.</summary>
     internal static class GamepadGlyphs {
