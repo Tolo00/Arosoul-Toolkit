@@ -183,13 +183,6 @@ public static class SceneDatabase
                 UpmId = "https://github.com/TylerTemp/SaintsField.git",
             },
 
-            new PackageDefinition
-            {
-                Id = "saintsfield", Name = "Saints Field", Category = "Open Source",
-                Description = "Editor attribute library.",
-                UpmId = "https://github.com/TylerTemp/SaintsField.git",
-            },
-
             // ── Arosoul Packages ───────────────────────────────────────────────
             new PackageDefinition
             {
