@@ -1,6 +1,6 @@
 {
   "name": "com.arosoul.scenes",
-  "version": "2.0.0",
+  "version": "1.0.0",
   "displayName": "Arosoul Scenes",
   "description": "Scene management with slots, scene dependencies, scene sets, readiness gating and transitions. Designed for Unity 6.6 with UI Toolkit.",
   "unity": "6000.6",

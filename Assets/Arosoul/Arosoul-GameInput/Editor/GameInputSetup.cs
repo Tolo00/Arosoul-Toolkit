@@ -1,8 +1,6 @@
-using System.IO;
 using System.Linq;
 using UnityEditor;
 using UnityEditor.Build;
-using UnityEngine;
 
 namespace GameInputSystem.EditorTools {
 
@@ -28,22 +26,7 @@ namespace GameInputSystem.EditorTools {
         }
 
         [MenuItem("Tools/Game Input/Create Config")]
-        static void CreateConfig() {
-            var existing = GameActionsGenerator.FindConfig();
-            if (existing != null) {
-                Selection.activeObject = existing;
-                EditorGUIUtility.PingObject(existing);
-                return;
-            }
-
-            Directory.CreateDirectory("Assets/Resources");
-            var config = ScriptableObject.CreateInstance<GameInputConfig>();
-            AssetDatabase.CreateAsset(config, "Assets/Resources/" + GameInputConfig.ResourceName + ".asset");
-            AssetDatabase.SaveAssets();
-
-            Selection.activeObject = config;
-            EditorGUIUtility.PingObject(config);
-        }
+        static void CreateConfig() => GameInputAgentTools.CreateConfig();
     }
 
 }

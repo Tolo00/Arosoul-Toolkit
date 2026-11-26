@@ -1,9 +1,9 @@
 # Arosoul Player Settings (UI Toolkit)
 
-Drop the folder into `Assets/` (or a package). Needs the UI Toolkit runtime (built in). URP is optional.
+Drop the folder into `Assets/` (or a package). Needs the UI Toolkit runtime and the Unity Input System package (`Unity.InputSystem` assembly); the Arosoul Game Input wrapper itself is optional. URP brightness is optional and requires URP.
 
 ## Quick start
-1. **Custom settings:** `Tools > Arosoul > Player Settings > Custom Settings`. Add rows, press Save.
+1. **Custom settings:** `Tools > Player Settings > Custom Settings`. Add rows, press Save.
    This writes `Assets/Settings/CustomSettings.cs`. Use it from code:
    ```csharp
    float sens = CustomSettings.MouseSensitivity;      // read
@@ -11,11 +11,11 @@ Drop the folder into `Assets/` (or a package). Needs the UI Toolkit runtime (bui
    var mode = CustomSettings.AimAssist;               // enum settings become a real C# enum (AimAssistOption)
    GameSettings.Changed += id => { ... };             // react to changes
    ```
-2. **Layout:** `Create > Arosoul > Player Settings > Settings Layout`. Pick tab orientation / apply mode in the inspector,
+2. **Layout:** `Create > Player Settings > Settings Layout`. Pick tab orientation / apply mode in the inspector,
    press **Edit Categories**, add categories, toggle settings on and choose a display type for each.
 3. **Menu:** add a `Panel Renderer` (with a Panel Settings asset, Source Asset left empty) to a GameObject, add `SettingsMenu`, assign the layout.
    `Open()`, `Close()`, `Toggle()` are public. Switching tab or closing with unapplied edits asks whether to apply or discard them. Calling `Close()` again while the prompt is open dismisses it and keeps the menu open.
-4. **Styling (optional):** `Create > Arosoul > Player Settings > Settings Theme`, assign it on the layout.
+4. **Styling (optional):** `Create > Player Settings > Settings Theme`, assign it on the layout.
    Any template or style sheet you leave empty falls back to `Runtime/Resources/PlayerSettings/*`.
    The comment at the top of each UXML lists the element names the code expects (`label`, `slider`, `decrease`, ...).
 

@@ -51,8 +51,9 @@ namespace GameInputSystem.EditorTools {
             EditorApplication.delayCall += () => { queued = false; Generate(false); };
         }
 
-        public static void Generate(bool verbose) {
-            var config = FindConfig();
+        public static void Generate(bool verbose) => Generate(FindConfig(), verbose);
+
+        public static void Generate(GameInputConfig config, bool verbose) {
             if (config == null) {
                 if (verbose) Debug.LogWarning("[GameInput] No GameInputConfig found. Use Tools > Game Input > Create Config.");
                 return;
@@ -93,7 +94,8 @@ namespace GameInputSystem.EditorTools {
             sb.AppendLine("    public static class GameActions {");
 
             var all = new List<string>();
-            var usedMaps = new HashSet<string>();
+            // These names are already used by members of the containing GameActions class.
+            var usedMaps = new HashSet<string> { "All", "Register", "GameActions" };
 
             foreach (var map in config.Actions.actionMaps) {
                 if (config.IsExcludedMap(map.name)) continue;

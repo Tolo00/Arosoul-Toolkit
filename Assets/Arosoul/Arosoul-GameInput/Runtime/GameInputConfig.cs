@@ -61,8 +61,8 @@ namespace GameInputSystem {
 
         public static GameInputConfig Load() => Resources.Load<GameInputConfig>(ResourceName);
 
-        public bool IsExcludedMap(string mapName) => excludedMaps.Contains(mapName);
-        public bool IsLocked(string mapName, string actionName) => lockedActions.Contains(mapName + "/" + actionName);
+        public bool IsExcludedMap(string mapName) => excludedMaps != null && excludedMaps.Contains(mapName);
+        public bool IsLocked(string mapName, string actionName) => lockedActions != null && lockedActions.Contains(mapName + "/" + actionName);
     }
 
 }
