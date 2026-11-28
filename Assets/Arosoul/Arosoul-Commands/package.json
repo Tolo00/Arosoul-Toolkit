@@ -1,0 +1,23 @@
+{
+  "name": "com.arosoul.commands",
+  "version": "1.0.0",
+  "displayName": "Arosoul Commands",
+  "description": "In-game command console rendered with UI Toolkit. Expose methods, properties and fields with [Command], with autocomplete, history and a commands debugger.",
+  "unity": "6000.6",
+  "author": {
+    "name": "Tobias Löwdin",
+    "url": "https://tolo00.github.io/"
+  },
+  "license": "SEE LICENSE IN LICENSE.txt",
+  "keywords": [
+    "arosoul",
+    "unity",
+    "console",
+    "commands",
+    "debug",
+    "cheats"
+  ],
+  "dependencies": {
+    "com.unity.inputsystem": "1.20.1"
+  }
+}

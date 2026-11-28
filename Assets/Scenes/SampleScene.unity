@@ -476,6 +476,63 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: e6b91cd346b8444a8892ad59bb16bbcc, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::TestingScript
+--- !u!1001 &1388864416
+PrefabInstance:
+  m_ObjectHideFlags: 0
+  serializedVersion: 2
+  m_Modification:
+    serializedVersion: 3
+    m_TransformParent: {fileID: 0}
+    m_Modifications:
+    - target: {fileID: 5991944448839529123, guid: 156eb8a1fe5034b4e9650db3abb8c68e, type: 3}
+      propertyPath: m_Name
+      value: Commands Console
+      objectReference: {fileID: 0}
+    - target: {fileID: 6668309150779752996, guid: 156eb8a1fe5034b4e9650db3abb8c68e, type: 3}
+      propertyPath: m_LocalPosition.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 6668309150779752996, guid: 156eb8a1fe5034b4e9650db3abb8c68e, type: 3}
+      propertyPath: m_LocalPosition.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 6668309150779752996, guid: 156eb8a1fe5034b4e9650db3abb8c68e, type: 3}
+      propertyPath: m_LocalPosition.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 6668309150779752996, guid: 156eb8a1fe5034b4e9650db3abb8c68e, type: 3}
+      propertyPath: m_LocalRotation.w
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 6668309150779752996, guid: 156eb8a1fe5034b4e9650db3abb8c68e, type: 3}
+      propertyPath: m_LocalRotation.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 6668309150779752996, guid: 156eb8a1fe5034b4e9650db3abb8c68e, type: 3}
+      propertyPath: m_LocalRotation.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 6668309150779752996, guid: 156eb8a1fe5034b4e9650db3abb8c68e, type: 3}
+      propertyPath: m_LocalRotation.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 6668309150779752996, guid: 156eb8a1fe5034b4e9650db3abb8c68e, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 6668309150779752996, guid: 156eb8a1fe5034b4e9650db3abb8c68e, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 6668309150779752996, guid: 156eb8a1fe5034b4e9650db3abb8c68e, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.z
+      value: 0
+      objectReference: {fileID: 0}
+    m_RemovedComponents: []
+    m_RemovedGameObjects: []
+    m_AddedGameObjects: []
+    m_AddedComponents: []
+  m_SourcePrefab: {fileID: 100100000, guid: 156eb8a1fe5034b4e9650db3abb8c68e, type: 3}
 --- !u!1 &1900771738
 GameObject:
   m_ObjectHideFlags: 0
@@ -507,7 +564,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Arosoul.PlayerSettings::Arosoul.PlayerSettings.SettingsMenu
   layout: {fileID: 11400000, guid: 22ea0f3573f6043238d537deda5fc4d5, type: 2}
-  visibleOnStart: 1
+  visibleOnStart: 0
 --- !u!1931382934 &1900771740
 PanelRenderer:
   m_ObjectHideFlags: 0
@@ -590,3 +647,4 @@ SceneRoots:
   - {fileID: 832575519}
   - {fileID: 1900771741}
   - {fileID: 876488188}
+  - {fileID: 1388864416}

@@ -1,0 +1,19 @@
+{
+    "name": "Arosoul.Commands.Editor",
+    "rootNamespace": "Arosoul.Commands.Editor",
+    "references": [
+        "Arosoul.Commands",
+        "Unity.InputSystem"
+    ],
+    "includePlatforms": [
+        "Editor"
+    ],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}

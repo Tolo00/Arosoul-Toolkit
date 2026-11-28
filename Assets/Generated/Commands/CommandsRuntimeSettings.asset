@@ -1,0 +1,35 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 64b29c159a4b142099334cf72f61f7f9, type: 3}
+  m_Name: CommandsRuntimeSettings
+  m_EditorClassIdentifier: Arosoul.Commands::Arosoul.Commands.CommandsRuntimeSettings
+  _data:
+    Availability: 1
+    DontDestroyOnLoad: 1
+    ToggleKey: 96
+    CloseKey: 60
+    SubmitKey: 2
+    AutocompleteKey: 3
+    PreviousKey: 63
+    NextKey: 64
+    PauseWhileOpen: 0
+    UnityLogLevel: 2
+    ShowStackTraces: 1
+    MaxSuggestions: 8
+    MaxLogEntries: 500
+    HistorySize: 50
+    PersistHistory: 1
+    Height: 0.4
+    FontSize: 16
+    SortingOrder: 32100
+    PanelSettings: {fileID: 0}
+    Theme: {fileID: -4733365628477956816, guid: d3ee41cecc3344419a9eebb253a8ea35, type: 3}
