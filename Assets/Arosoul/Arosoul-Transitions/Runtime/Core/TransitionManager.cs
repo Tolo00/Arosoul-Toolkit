@@ -93,7 +93,7 @@ namespace Arosoul.Transitions
 
             if (!TransitionRegistry.TryGetDefinition(parameters.Id, out TransitionDefinition definition))
             {
-                Debug.LogError($"Unable to find a transition definition for {parameters.Id}. Make sure the id is valid and the registry is up to date (Tools > Transition System > Transitions).", this);
+                Debug.LogError($"Unable to find a transition definition for {parameters.Id}. Make sure the id is valid and the registry is up to date (Tools > Arosoul > Transitions > Transitions).", this);
                 handle.SetPhase(TransitionPhase.Cancelled);
                 handle.DisposeToken();
                 return handle;

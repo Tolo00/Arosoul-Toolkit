@@ -7,7 +7,7 @@ and use them from a drop-down console with autocomplete, history and mirrored Un
 
 1. Add the console to your first scene: **GameObject > Arosoul > Commands Console** (or the button in the settings window).
    It survives scene loads by default; a second console destroys itself.
-2. Adjust settings in **Tools > Arosoul Commands > Settings**: availability (Editor only, Development builds, All builds),
+2. Adjust settings in **Tools > Arosoul > Commands > Settings**: availability (Editor only, Development builds, All builds),
    keys, pause while open, Unity log level, history, size and font.
 
 Settings are stored in `ProjectSettings/CommandsSettings.asset` and baked into `Assets/Generated/Commands/CommandsRuntimeSettings.asset`
@@ -63,8 +63,8 @@ From code: `CommandAPI.Execute("time-scale = 0.5")`, `CommandAPI.Log("...")`, `C
 
 ## Tools
 
-- **Tools > Arosoul Commands > Settings**: settings and validation.
-- **Tools > Arosoul Commands > Debugger**: every command grouped by class, with signature, target and setup problems.
+- **Tools > Arosoul > Commands > Settings**: settings and validation.
+- **Tools > Arosoul > Commands > Debugger**: every command grouped by class, with signature, target and setup problems.
   Double-click a command to open its script at the member.
 - `Arosoul.Commands.Editor.CommandsAgentTools`: validate, describe, change settings and run commands from code. See SKILLS.md.
 

@@ -104,7 +104,7 @@ Built-in commands (`Runtime/BuiltIn/BuiltInCommands.cs`): `help [command]`, `com
   or `CommandsAgentTools.AddConsoleToActiveScene()` adds it. With `DontDestroyOnLoad` (default) it is moved to the root and persists.
   Later consoles destroy themselves.
 - **Settings:** `CommandsSettingsData` in `ProjectSettings/CommandsSettings.asset` (`CommandsSettings` ScriptableSingleton), edited in
-  **Tools > Arosoul Commands > Settings**. Baked by `CommandsSettingsBaker` to `Assets/Generated/Commands/CommandsRuntimeSettings.asset`
+  **Tools > Arosoul > Commands > Settings**. Baked by `CommandsSettingsBaker` to `Assets/Generated/Commands/CommandsRuntimeSettings.asset`
   and added to Player Settings' preloaded assets. Baking runs on every settings change, before every build, and once on editor load
   if the asset is missing. **Do not hand-edit either asset**; use the window or `CommandsAgentTools.ModifySettings`.
 - **Availability:** `EditorOnly`, `DevelopmentBuilds` (default) or `AllBuilds`. Always available in the editor. Elsewhere `CommandConsole`
@@ -135,7 +135,7 @@ Built-in commands (`Runtime/BuiltIn/BuiltInCommands.cs`): `help [command]`, `com
 Typical agent loop after adding commands: recompile → `CommandsAgentTools.Validate()` → fix errors → `CommandsAgentTools.Execute("...")`
 (enter play mode first for instance commands) → check output.
 
-Other editor entry points: `CommandsDebuggerWindow` (Tools > Arosoul Commands > Debugger), `CommandSourceLocator.TryFind/TryOpen(member)`.
+Other editor entry points: `CommandsDebuggerWindow` (Tools > Arosoul > Commands > Debugger), `CommandSourceLocator.TryFind/TryOpen(member)`.
 
 ## 7. Rules for agents and gotchas
 

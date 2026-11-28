@@ -57,7 +57,7 @@ namespace Arosoul.Transitions.Editor
             return result;
         }
 
-        [MenuItem("Tools/Transition System/Regenerate Ids")]
+        [MenuItem("Tools/Arosoul/Transitions/Regenerate Ids", priority = 111)]
         public static void RefreshMenu()
         {
             Refresh();

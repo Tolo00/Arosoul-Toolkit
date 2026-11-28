@@ -5,7 +5,7 @@ namespace Arosoul.Commands.Editor
 {
     /// <summary>
     /// Project wide console settings, stored in ProjectSettings/CommandsSettings.asset and edited in
-    /// Tools > Arosoul Commands > Settings. The runtime reads a baked copy, see <see cref="CommandsRuntimeSettings"/>.
+    /// Tools > Arosoul > Commands > Settings. The runtime reads a baked copy, see <see cref="CommandsRuntimeSettings"/>.
     /// </summary>
     [FilePath("ProjectSettings/CommandsSettings.asset", FilePathAttribute.Location.ProjectFolder)]
     public sealed class CommandsSettings : ScriptableSingleton<CommandsSettings>

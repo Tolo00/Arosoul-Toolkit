@@ -113,8 +113,8 @@ For anything the helpers do not cover (interactions, processors, other composite
 
 Unity menu equivalents:
 
-- `Tools > Game Input > Create Config`
-- `Tools > Game Input > Generate Actions`
+- `Tools > Arosoul > GameInput > Create Config`
+- `Tools > Arosoul > GameInput > Generate Actions`
 
 ## Runtime API
 

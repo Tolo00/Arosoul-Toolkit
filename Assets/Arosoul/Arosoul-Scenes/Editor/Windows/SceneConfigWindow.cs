@@ -26,7 +26,7 @@ namespace Arosoul.Scenes.Editor
 
         private string _snapshot;
 
-        [MenuItem("Tools/Scene System/Scene Config")]
+        [MenuItem("Tools/Arosoul/Scenes/Scene Config", priority = 106)]
         public static void Open()
         {
             var window = GetWindow<SceneConfigWindow>();

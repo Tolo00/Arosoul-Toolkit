@@ -20,7 +20,7 @@ namespace Arosoul.Scenes.Editor
 
             ValidationReport validation = SceneCatalogBaker.Bake();
             if (SceneCatalogBaker.IsIdsOutOfSync())
-                Debug.LogWarning("The generated SceneIds script is out of sync with the Scene Config. Rebuild it in Tools > Scene System > Scene Config.");
+                Debug.LogWarning("The generated SceneIds script is out of sync with the Scene Config. Rebuild it in Tools > Arosoul > Scenes > Scene Config.");
 
             if (!validation.HasErrors) return;
 

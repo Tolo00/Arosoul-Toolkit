@@ -50,9 +50,9 @@ SceneAPI.Load / Unload / NewOperation
 
 Editor menu items:
 
-- **Tools > Scene System > Scene Config**: configure core scene, registered scenes/dependencies, slots, validation, editor bootstrap, and build-settings syncing.
-- **Tools > Scene System > Scene Debugger**: inspect loaded scenes, slots, queued/current operations, transitions, input-block reasons, and the event log while playing.
-- **Tools > Scene System > Rebuild Catalog**: save/commit settings and bake the runtime catalog.
+- **Tools > Arosoul > Scenes > Scene Config**: configure core scene, registered scenes/dependencies, slots, validation, editor bootstrap, and build-settings syncing.
+- **Tools > Arosoul > Scenes > Scene Debugger**: inspect loaded scenes, slots, queued/current operations, transitions, input-block reasons, and the event log while playing.
+- **Tools > Arosoul > Scenes > Rebuild Catalog**: save/commit settings and bake the runtime catalog.
 
 **Never hand-edit `ProjectSettings/ScenesSettings.asset`, `Assets/Generated/Scenes/SceneCatalog.asset`, `SceneIds.cs`, or the generated bootstrap scene.** Use Scene Config and the provided menu/buttons; generated assets are maintained by the editor tooling.
 
@@ -73,7 +73,7 @@ Generated members:
 
 ## 3. Configure the system in the Editor
 
-Open **Tools > Scene System > Scene Config**. Its tabs are:
+Open **Tools > Arosoul > Scenes > Scene Config**. Its tabs are:
 
 - **General**: optional core scene, initial slot, Play Mode Bootstrap, and Sync Build Settings.
 - **Scenes**: register scenes, configure dependencies, search by scene name, drag scenes from the Project window, or use **Register All Scenes In Folder** (includes subfolders).

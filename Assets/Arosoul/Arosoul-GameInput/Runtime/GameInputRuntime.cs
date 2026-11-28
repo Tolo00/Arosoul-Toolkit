@@ -30,7 +30,7 @@ namespace Arosoul.GameInput {
 
             Config = GameInputConfig.Load();
             if (Config == null || Config.Actions == null) {
-                Debug.LogError("[GameInput] No GameInputConfig with an Input Actions asset found in a Resources folder. Use Tools > Game Input > Create Config.");
+                Debug.LogError("[GameInput] No GameInputConfig with an Input Actions asset found in a Resources folder. Use Tools > Arosoul > GameInput > Create Config.");
                 return;
             }
 
@@ -44,7 +44,7 @@ namespace Arosoul.GameInput {
             foreach (var action in registered.Values) {
                 var inputAction = Asset.FindAction(action.Path, false);
                 if (inputAction == null) {
-                    Debug.LogError($"[GameInput] '{action.Path}' no longer exists in the Input Actions asset. Regenerate GameActions (Tools > Game Input > Generate Actions).");
+                    Debug.LogError($"[GameInput] '{action.Path}' no longer exists in the Input Actions asset. Regenerate GameActions (Tools > Arosoul > GameInput > Generate Actions).");
                     continue;
                 }
                 action.Bind(inputAction);

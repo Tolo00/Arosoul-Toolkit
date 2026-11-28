@@ -27,7 +27,7 @@ namespace Arosoul.PlayerSettings.EditorTools {
         Button saveButton;
         HelpBox errorBox;
 
-        [MenuItem("Tools/Player Settings/Custom Settings")]
+        [MenuItem("Tools/Arosoul/PlayerSettings/Custom Settings", priority = 104)]
         public static void Open() {
             var window = GetWindow<CustomSettingsWindow>();
             window.titleContent = new GUIContent("Custom Settings");

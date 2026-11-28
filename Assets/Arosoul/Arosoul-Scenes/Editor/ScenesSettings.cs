@@ -5,7 +5,7 @@ namespace Arosoul.Scenes.Editor
 {
     /// <summary>
     /// Project wide Scenes settings, stored in ProjectSettings/ScenesSettings.asset and edited in the Scene Config window
-    /// (Tools > Scene System > Scene Config). The runtime reads a baked copy, see <see cref="SceneCatalog"/>.
+    /// (Tools > Arosoul > Scenes > Scene Config). The runtime reads a baked copy, see <see cref="SceneCatalog"/>.
     /// </summary>
     [FilePath("ProjectSettings/ScenesSettings.asset", FilePathAttribute.Location.ProjectFolder)]
     public sealed class ScenesSettings : ScriptableSingleton<ScenesSettings>

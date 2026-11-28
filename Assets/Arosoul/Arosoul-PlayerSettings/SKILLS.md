@@ -145,9 +145,9 @@ The APIs are Editor-only and must run on Unity's main Editor thread. For batch m
 
 The EditorWindow equivalents are:
 
-- `Tools > Player Settings > Custom Settings`
-- Create a layout through `Create > Player Settings > Settings Layout`
-- Create a theme through `Create > Player Settings > Settings Theme`
+- `Tools > Arosoul > PlayerSettings > Custom Settings`
+- Create a layout through `Create > Arosoul > PlayerSettings > Settings Layout`
+- Create a theme through `Create > Arosoul > PlayerSettings > Settings Theme`
 - Select a `SettingsLayout` asset and use **Edit Categories** in its inspector.
 
 ## Layout authoring

@@ -34,7 +34,7 @@ namespace Arosoul.GameInput.EditorTools {
 
         static bool queued;
 
-        [MenuItem("Tools/Game Input/Generate Actions")]
+        [MenuItem("Tools/Arosoul/GameInput/Generate Actions", priority = 103)]
         static void MenuGenerate() => Generate(true);
 
         public static GameInputConfig FindConfig() {
@@ -55,7 +55,7 @@ namespace Arosoul.GameInput.EditorTools {
 
         public static void Generate(GameInputConfig config, bool verbose) {
             if (config == null) {
-                if (verbose) Debug.LogWarning("[GameInput] No GameInputConfig found. Use Tools > Game Input > Create Config.");
+                if (verbose) Debug.LogWarning("[GameInput] No GameInputConfig found. Use Tools > Arosoul > GameInput > Create Config.");
                 return;
             }
             if (config.Actions == null) {

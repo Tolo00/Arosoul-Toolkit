@@ -52,7 +52,7 @@ namespace Arosoul.PlayerSettings {
     /// Describes how the settings menu is generated: which tabs exist, which settings each tab contains
     /// and how each setting is displayed. Edit the categories with the "Edit Categories" button in the inspector.
     /// </summary>
-    [CreateAssetMenu(fileName = "SettingsLayout", menuName = "Player Settings/Settings Layout")]
+    [CreateAssetMenu(fileName = "SettingsLayout", menuName = "Arosoul/PlayerSettings/Settings Layout")]
     public sealed class SettingsLayout : ScriptableObject {
         [SerializeField] string title = "Settings";
         [SerializeField] TabOrientation tabOrientation = TabOrientation.Horizontal;

@@ -26,7 +26,9 @@ namespace Arosoul.Commands.Tests
     internal static class TestCommands
     {
         [Command] public static int Number;
+#pragma warning disable CS0414 // only read through the command
         [Command] private static int _secret = 5;
+#pragma warning restore CS0414
 
         private static float _speed = 1f;
         [Command] public static readonly int ReadOnlyNumber = 7;

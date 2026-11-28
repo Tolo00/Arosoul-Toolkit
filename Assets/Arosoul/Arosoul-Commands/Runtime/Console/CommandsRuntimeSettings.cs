@@ -7,7 +7,7 @@ namespace Arosoul.Commands
 {
     /// <summary>
     /// Runtime copy of the console settings, baked to Assets/Generated/Commands and added to the preloaded assets.
-    /// Do not edit it directly; use Tools > Arosoul Commands > Settings.
+    /// Do not edit it directly; use Tools > Arosoul > Commands > Settings.
     /// </summary>
     public sealed class CommandsRuntimeSettings : ScriptableObject
     {

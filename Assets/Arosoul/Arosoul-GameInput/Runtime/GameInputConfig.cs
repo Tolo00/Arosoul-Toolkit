@@ -12,10 +12,10 @@ namespace Arosoul.GameInput {
     }
 
     /// <summary>
-    /// The one asset GameInput needs. It must live in a Resources folder (Tools > Game Input > Create Config)
+    /// The one asset GameInput needs. It must live in a Resources folder (Tools > Arosoul > GameInput > Create Config)
     /// Assign your Input Actions asset, everything else is generated from it.
     /// </summary>
-    [CreateAssetMenu(fileName = ResourceName, menuName = "Game Input/Config")]
+    [CreateAssetMenu(fileName = ResourceName, menuName = "Arosoul/GameInput/Config")]
     public sealed class GameInputConfig : ScriptableObject {
         public const string ResourceName = "GameInputConfig";
 

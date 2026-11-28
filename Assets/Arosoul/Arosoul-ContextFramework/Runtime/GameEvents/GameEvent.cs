@@ -17,7 +17,7 @@ namespace Arosoul.ContextFramework
     /// Use this to create reusable, project-wide event assets for flexible,
     /// modular, and inspector-friendly event-driven design.
     /// </summary>
-    [CreateAssetMenu(fileName = "New Game Event", menuName = "Context Framework/Game Event")]
+    [CreateAssetMenu(fileName = "New Game Event", menuName = "Arosoul/ContextFramework/Game Event")]
     public class GameEvent : ScriptableObject, IEnterPlayModeCallback, IExitPlayModeCallback {
         readonly List<GameEventDelegate> _listeners = new();
         public List<GameEventDelegate> GetListeners() => _listeners;

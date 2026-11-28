@@ -4,7 +4,7 @@ A thin wrapper on the Unity Input System for singleplayer games.
 Edit actions in Unity's own **Input Actions editor** and `GameActions` is generated for you.
 
 ## Setup
-1. `Tools > Game Input > Create Config` (creates `Assets/Resources/GameInputConfig.asset`).
+1. `Tools > Arosoul > GameInput > Create Config` (creates `Assets/Resources/GameInputConfig.asset`).
 2. Assign your Input Actions asset to it. `GameActions.cs` is generated into `Assets/Generated` (changeable) and regenerated every time the asset is saved.
 3. Use it (`GameActions` is generated in the global namespace; add `using Arosoul.GameInput;` for `GameInput` and `GameInputBindings`):
    ```csharp

@@ -5,7 +5,7 @@ Scene management for Unity 6.6: slots, scene dependencies, readiness gating, que
 
 ## Setup
 
-1. Open **Tools > Scene System > Scene Config**.
+1. Open **Tools > Arosoul > Scenes > Scene Config**.
 2. Optionally enable a **Core scene**. It is a dependency of every scene and never unloaded.
 3. Register scenes: drag them onto the Scenes tab, use *Register Scene*, *Register All Scenes In Folder* (a folder under Assets, subfolders included), or the Register button next to any scene field. Then add their dependencies. The search bar filters the list by scene name.
 4. Define slots.
@@ -72,8 +72,8 @@ For deterministic Awake order in builds, make build index 0 a minimal boot scene
 
 ## Tools
 
-- **Tools > Scene System > Scene Config**: settings and validation.
-- **Tools > Scene System > Scene Debugger**: live view in play mode (loaded scenes and why, slots, operations, transition, input blocking, log).
+- **Tools > Arosoul > Scenes > Scene Config**: settings and validation.
+- **Tools > Arosoul > Scenes > Scene Debugger**: live view in play mode (loaded scenes and why, slots, operations, transition, input blocking, log).
 - Validation also runs on every bake and before builds; errors fail the build.
 
 ## Tests

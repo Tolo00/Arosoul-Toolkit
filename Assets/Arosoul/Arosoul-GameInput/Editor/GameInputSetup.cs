@@ -25,7 +25,7 @@ namespace Arosoul.GameInput.EditorTools {
             }
         }
 
-        [MenuItem("Tools/Game Input/Create Config")]
+        [MenuItem("Tools/Arosoul/GameInput/Create Config", priority = 102)]
         static void CreateConfig() => GameInputAgentTools.CreateConfig();
     }
 

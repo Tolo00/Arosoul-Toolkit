@@ -6,7 +6,7 @@ using UnityEngine.UIElements;
 namespace Arosoul.Commands
 {
     /// <summary>
-    /// Console settings. Edited in Tools > Arosoul Commands > Settings and stored in ProjectSettings/CommandsSettings.asset;
+    /// Console settings. Edited in Tools > Arosoul > Commands > Settings and stored in ProjectSettings/CommandsSettings.asset;
     /// the runtime reads a baked copy, see <see cref="CommandsRuntimeSettings"/>.
     /// </summary>
     [Serializable]

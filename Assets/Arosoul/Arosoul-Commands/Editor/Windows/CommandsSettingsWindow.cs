@@ -14,7 +14,7 @@ namespace Arosoul.Commands.Editor
         private VisualElement _diagnostics;
         private bool _commitScheduled;
 
-        [MenuItem("Tools/Arosoul Commands/Settings", priority = 0)]
+        [MenuItem("Tools/Arosoul/Commands/Settings", priority = 100)]
         public static void Open()
         {
             var window = GetWindow<CommandsSettingsWindow>();

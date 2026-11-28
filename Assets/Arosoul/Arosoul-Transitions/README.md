@@ -34,7 +34,7 @@ public class WipeTransition : TransitionDefinition
 }
 ```
 
-Create an asset of it (Tools > Transition System > Transitions > New Transition). The same window shows each transition's type and can delete the selected one. `TransitionIds.Wipe` appears after the next compile.
+Create an asset of it (Tools > Arosoul > Transitions > Transitions > New Transition). The same window shows each transition's type and can delete the selected one. `TransitionIds.Wipe` appears after the next compile.
 From code, `Arosoul.Transitions.Editor.TransitionsAgentTools` can create, rename, delete, validate and describe transitions (see SKILLS.md).
 Override `PlayAsync` to drive the In/Out phases with your own animation library, and `OnProgress` to react to progress.
 

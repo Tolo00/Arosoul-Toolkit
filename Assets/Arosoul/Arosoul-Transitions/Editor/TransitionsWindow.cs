@@ -19,7 +19,7 @@ namespace Arosoul.Transitions.Editor
         private HelpBox _issues;
         private ToolbarButton _deleteButton;
 
-        [MenuItem("Tools/Transition System/Transitions")]
+        [MenuItem("Tools/Arosoul/Transitions/Transitions", priority = 110)]
         public static void Open()
         {
             var window = GetWindow<TransitionsWindow>();

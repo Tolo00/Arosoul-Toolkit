@@ -22,7 +22,7 @@ namespace Arosoul.Commands.Editor
         private TreeView _tree;
         private Label _details;
 
-        [MenuItem("Tools/Arosoul Commands/Debugger", priority = 1)]
+        [MenuItem("Tools/Arosoul/Commands/Debugger", priority = 101)]
         public static void Open()
         {
             var window = GetWindow<CommandsDebuggerWindow>();

@@ -15,7 +15,7 @@ namespace Arosoul.Scenes.Editor
     {
         private VisualElement _content;
 
-        [MenuItem("Tools/Scene System/Scene Debugger")]
+        [MenuItem("Tools/Arosoul/Scenes/Scene Debugger", priority = 107)]
         public static void Open()
         {
             var window = GetWindow<SceneDebuggerWindow>();
@@ -46,7 +46,7 @@ namespace Arosoul.Scenes.Editor
 
             if (!SceneManager.HasInstance)
             {
-                _content.Add(new HelpBox("Scenes is not running. Create a scene catalog in Tools > Scene System > Scene Config.", HelpBoxMessageType.Warning));
+                _content.Add(new HelpBox("Scenes is not running. Create a scene catalog in Tools > Arosoul > Scenes > Scene Config.", HelpBoxMessageType.Warning));
                 AddLog(_content);
                 return;
             }

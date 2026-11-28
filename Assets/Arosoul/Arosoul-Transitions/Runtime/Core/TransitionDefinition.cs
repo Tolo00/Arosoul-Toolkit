@@ -10,7 +10,7 @@ namespace Arosoul.Transitions
     ///
     /// To add a new transition:
     /// 1. Create a class that derives from this one and implement <see cref="Build"/> and <see cref="Apply"/>.
-    /// 2. Create an asset of it (Create > Arosoul > Transitions, or through Tools > Transition System > Transitions).
+    /// 2. Create an asset of it (Create > Arosoul > Transitions, or through Tools > Arosoul > Transitions > Transitions).
     /// 3. A type-safe id is generated automatically (TransitionIds.YourKey).
     /// </summary>
     public abstract class TransitionDefinition : ScriptableObject

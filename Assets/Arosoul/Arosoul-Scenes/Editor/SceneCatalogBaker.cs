@@ -165,7 +165,7 @@ namespace Arosoul.Scenes.Editor
                 spec.Entries.Add(new IdEntry(names[i], entries[i].expression));
         }
 
-        [MenuItem("Tools/Scene System/Rebuild Catalog")]
+        [MenuItem("Tools/Arosoul/Scenes/Rebuild Catalog", priority = 108)]
         private static void RebuildMenu()
         {
             ScenesSettingsUtility.Commit();

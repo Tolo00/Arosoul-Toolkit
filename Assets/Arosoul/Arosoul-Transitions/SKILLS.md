@@ -46,8 +46,8 @@ There is no transition queue. A new play request either starts, interrupts the a
 
 Editor menu items:
 
-- **Tools > Transition System > Transitions**: create, inspect, preview, and delete definitions.
-- **Tools > Transition System > Regenerate Ids**: force a registry and generated-id refresh.
+- **Tools > Arosoul > Transitions > Transitions**: create, inspect, preview, and delete definitions.
+- **Tools > Arosoul > Transitions > Regenerate Ids**: force a registry and generated-id refresh.
 
 The editor refreshes ids and the registry when a definition asset is created, changed, moved, or deleted, and before a build. The generated registry is also added to Player Settings' preloaded assets. Do not remove that preloaded asset entry unless you have replaced the registry-loading mechanism.
 
@@ -130,7 +130,7 @@ Important semantics:
 
 1. Create a non-abstract class derived from `TransitionDefinition`.
 2. Implement `Build()` and `Apply(...)`.
-3. Create an asset through **Tools > Transition System > Transitions > New Transition**, `[CreateAssetMenu]`, or `TransitionsAgentTools.CreateDefinition<T>(assetName, key)` (after the new type has compiled).
+3. Create an asset through **Tools > Arosoul > Transitions > Transitions > New Transition**, `[CreateAssetMenu]`, or `TransitionsAgentTools.CreateDefinition<T>(assetName, key)` (after the new type has compiled).
 4. Let the editor assign the id and generate `TransitionIds.<Key>`; do not assign `_id` manually.
 
 ```csharp
@@ -206,7 +206,7 @@ InputBlocker.BlockedChanged += OnBlockedChanged;
 
 ## 6. Registry, ids, and editor workflow
 
-The **Tools > Transition System > Transitions** window:
+The **Tools > Arosoul > Transitions > Transitions** window:
 
 - Lists definitions by key; the type name is shown separately.
 - Creates instances of non-abstract `TransitionDefinition` types.

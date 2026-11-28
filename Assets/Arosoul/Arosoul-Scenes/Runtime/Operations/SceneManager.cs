@@ -161,7 +161,7 @@ namespace Arosoul.Scenes
             {
                 SetPhase(op, SceneOperationPhase.Planning);
                 if (_catalog == null)
-                    throw new InvalidOperationException("No scene catalog found. Open Tools > Scene System > Scene Config to set up Scenes.");
+                    throw new InvalidOperationException("No scene catalog found. Open Tools > Arosoul > Scenes > Scene Config to set up Scenes.");
 
                 ScenePlan plan = BuildPlan(op, out string activeGuid);
                 if (!plan.IsValid)
@@ -444,7 +444,7 @@ namespace Arosoul.Scenes
             SlotId slot = _catalog.Data.InitialSlot;
             if (slot.IsNone)
             {
-                Debug.LogError("Scenes has no initial slot. Set one in Tools > Scene System > Scene Config.");
+                Debug.LogError("Scenes has no initial slot. Set one in Tools > Arosoul > Scenes > Scene Config.");
                 return;
             }
 

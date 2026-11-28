@@ -9,7 +9,7 @@ namespace Arosoul.Commands
     /// </summary>
     /// <example>
     /// <code>
-    /// public class ItemParser : ValueParser<ItemSO>;
+    /// public class ItemParser : ValueParser&lt;ItemSO&gt;
     /// {
     ///     public override bool TryParse(string text, out ItemSO value)
     ///     {
